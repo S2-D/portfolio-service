@@ -1,18 +1,11 @@
-from flask import Flask, jsonify
+from flask import Flask
 from flask_cors import CORS
 
-app = Flask(__name__)
-CORS(app)
+def create_app():
+    app = Flask(__name__)
+    CORS(app)
 
-@app.route('/')
-def hello():
-    return jsonify(status = 'success', result="Hello Flask!!!")
+    import auth
+    app.register_blueprint(auth.bp)
 
-@app.route('/api')
-def apiTest():
-    result = {
-        'name': "nameTest",
-        'desc': "desc"
-    }
-    
-    return jsonify(status = 'success', result=result)
+    return app
