@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Signup from './signup';
-
+import WithFormik from'./login';
 
 import {Link, Route, Switch} from 'react-router-dom'
 import React, { useState } from 'react';
@@ -14,7 +14,7 @@ function App() {
 
   const[user, setUser] = useState({});
   const[inputs, setInputs] = useState({
-    id:'',
+    email:'',
     password:'',
     confirm:'',
     username:''
@@ -29,7 +29,7 @@ function App() {
   // }
   const handleSubmit = (event) => {
     console.log(inputs)
-    alert('A name was submitted: ' + inputs.id);
+    alert('A name was submitted: ' + inputs.email);
     event.preventDefault();
   }
 
@@ -41,7 +41,7 @@ function App() {
   })};
 
   const post = (data) => {
-    axios.post(url, data)
+    axios.post('http://localhost:5000/login', data)
         .then(response => console.log(response))
   }
   
@@ -55,7 +55,7 @@ function App() {
   }
 
   const register = () => {
-    const { id, password, confirm, username } = inputs;
+    const { email, password, confirm, username } = inputs;
     
       
         if( password === confirm ) {
@@ -90,6 +90,7 @@ function App() {
     
       {/* 로그인 */}
       <Route path="/login">
+      <WithFormik/>
       <Container>
         <Row>    
           <Col/>
@@ -97,7 +98,7 @@ function App() {
             <Form onSubmit={handleSubmit} >
               <Form.Group controlId="formBasicEmail">
                 <Form.Label>아이디</Form.Label>
-                <Form.Control name='id' type="email" onChange={onChange} />
+                <Form.Control name='email' type="email" onChange={onChange} />
                 <Form.Text className="text-muted" >
                 </Form.Text>
               </Form.Group>

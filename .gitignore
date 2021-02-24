@@ -107,6 +107,7 @@ dist
 .vscode-test
 
 server/__pycache__/
+__pycache__/
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
@@ -131,3 +132,5 @@ server/__pycache__/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+config.py

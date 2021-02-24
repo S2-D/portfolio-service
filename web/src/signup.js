@@ -1,16 +1,26 @@
 import React, { useState } from 'react';
-import { Container, Col, Form, Button, InputGroup } from 'react-bootstrap';
+import { Col, Form, Button, InputGroup } from 'react-bootstrap';
 
 import {Formik, ErrorMessage } from 'formik'
 import * as yup from 'yup'
 import axios from 'axios';
 
-
 const schema = yup.object().shape({
-    id:yup.string().required("아이디를 입력해주세요"),
-    password: yup.string().min(8, '8자리 이상으로 만들어주세요').max(16).required("비밀번호를 입력해주세요"),
-    confirm: yup.string().required("비밀번호를 확인해주세요"),
-    username: yup.string().required("이름을 입력해주세요")
+    email:yup
+      .string()
+      .required("아이디를 입력해주세요"),
+    password: yup
+      .string()
+      .min(8, '8자리 이상으로 만들어주세요')
+      .max(16)
+      .required("비밀번호를 입력해주세요")
+      .matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*d)[a-zA-Zd]$"),
+    confirm: yup
+      .string()
+      .required("비밀번호를 확인해주세요"),
+    username: yup
+      .string()
+      .required("이름을 입력해주세요")
   });
 
 function Signup() {
@@ -22,7 +32,7 @@ function Signup() {
         alert(JSON.stringify(values, null, 2));
       }}
       initialValues={{
-        id: '',
+        email: '',
         password: '',
         confirm: '',
         username: ''
@@ -40,7 +50,7 @@ function Signup() {
         <Form noValidate onSubmit={handleSubmit}>
           <Form.Row>
               {/* 아이디 */}
-            <Form.Group controlId="validationFormik01">
+            <Form.Group as={Col} md="4" controlId="validationFormik01">
               <Form.Label>아이디</Form.Label>
               <InputGroup hasValidation>
                 <InputGroup.Prepend>
@@ -48,16 +58,16 @@ function Signup() {
                 </InputGroup.Prepend>
               <Form.Control
                 type="text"
-                name="id"
-                value={values.id}
+                name="email"
+                value={values.email}
                 onChange={handleChange}
                 />
             </InputGroup>
-            <ErrorMessage name="id" component="p" />
+            <ErrorMessage name="email" component="p" />
             </Form.Group>
 
             {/* 비밀번호  */}
-            <Form.Group  controlId="validationFormik02">
+            <Form.Group as={Col} md="4" controlId="validationFormik02">
               <Form.Label>비밀번호</Form.Label>
               <Form.Control
                 type="password"
@@ -67,7 +77,7 @@ function Signup() {
                 />
               <ErrorMessage name="password" component="p" />
             </Form.Group>
-            <Form.Group controlId="validationFormik03">
+            <Form.Group as={Col} md="4" controlId="validationFormik03">
               <Form.Label>비밀번호 확인</Form.Label>
               <Form.Control
                 type="password"
@@ -79,7 +89,7 @@ function Signup() {
             </Form.Group>
 
             {/* 이름 */}
-            <Form.Group md="4" controlId="validationFormikUsername">
+            <Form.Group as={Col} md="4" controlId="validationFormikUsername">
               <Form.Label>이름</Form.Label>
              
                 <Form.Control
