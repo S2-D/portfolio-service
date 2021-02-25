@@ -11,10 +11,11 @@ const schema = yup.object().shape({
       .required("아이디를 입력해주세요"),
     password: yup
       .string()
-      .min(8, '8자리 이상으로 만들어주세요')
-      .max(16)
+      // .min(8, '8자리 이상으로 만들어주세요')
+      // .max(16)
+      // .matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*d)[a-zA-Zd]$")
       .required("비밀번호를 입력해주세요")
-      .matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*d)[a-zA-Zd]$"),
+      ,
     confirm: yup
       .string()
       .required("비밀번호를 확인해주세요"),
@@ -24,12 +25,18 @@ const schema = yup.object().shape({
   });
 
 function Signup() {
+
+  const post = (data) => {
+    axios.post(`http://localhost:5000/auth/signup`, data)
+        .then(response => console.log("response: ", response.data.result))
+}
   return (
     <Formik
       validationSchema={schema}
       onSubmit={values => {
-        console.log(values);    
+        // console.log(values);    
         alert(JSON.stringify(values, null, 2));
+        post(values);
       }}
       initialValues={{
         email: '',

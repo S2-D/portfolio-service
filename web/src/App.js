@@ -1,7 +1,8 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Signup from './signup';
-import WithFormik from'./login';
+import Login from './login';
+
 
 import {Link, Route, Switch} from 'react-router-dom'
 import React, { useState } from 'react';
@@ -10,17 +11,15 @@ import axios from 'axios';
 
 
 function App() {
+
   let url='http://localhost:5000/login'
 
-  const[user, setUser] = useState({});
   const[inputs, setInputs] = useState({
     email:'',
     password:'',
     confirm:'',
     username:''
   });
-  const[msg, setMsg] = useState(false);
-
 
   // let [value,setValue] =useState();
 
@@ -54,28 +53,6 @@ function App() {
     });
   }
 
-  const register = () => {
-    const { email, password, confirm, username } = inputs;
-    
-      
-        if( password === confirm ) {
-            setMsg(true);
-            return;
-        } else {
-            setMsg(false);
-        }
-
-    post(inputs);
-  }
-
-  const Msg = () => {
-    return (
-        <span className="msg">Check your password.</span>
-    );
-  }
-
-
-  // 
 
   return (
     <div>
@@ -85,43 +62,30 @@ function App() {
         <Nav className="ml-auto">
           <Nav.Link href="#home">메인</Nav.Link>
           <Nav.Link href="#home">네트워크</Nav.Link>
+          <Nav.Link onClick={()=>{
+            axios.get('http://localhost:5000/auth/logout').then(response => {
+                console.log(response);
+            })
+          }}>로그아웃</Nav.Link>
         </Nav>
       </Navbar>
-    
-      {/* 로그인 */}
-      <Route path="/login">
-      <WithFormik/>
-      <Container>
-        <Row>    
-          <Col/>
-          <Col xs={6} md={4} className="login-form">
-            <Form onSubmit={handleSubmit} >
-              <Form.Group controlId="formBasicEmail">
-                <Form.Label>아이디</Form.Label>
-                <Form.Control name='email' type="email" onChange={onChange} />
-                <Form.Text className="text-muted" >
-                </Form.Text>
-              </Form.Group>
-              <Form.Group controlId="formBasicPassword">
-                <Form.Label>비밀번호</Form.Label>
-                <Form.Control name='password' type="password" onChange={onChange}/>
-              </Form.Group>
-              <Button className="btn" variant="primary" type="submit">
-                로그인
-              </Button>
-              <Button className="btn" variant="dark" type="submit">
-                구글계정으로 로그인
-              </Button>
-              <Link className="link" to="/signup">회원가입하기</Link>
-            </Form>
-          </Col>
-          <Col/>
-        </Row>
-      </Container>
-      </Route>
+      
+      <Switch>
+        {/* 로그인 */}
+        <Route path="/login">
+          <Container>
+            <Row>    
+              <Col/>
+              <Col xs={6} md={4} className="login-form">
+                <Login/>
+              </Col>
+              <Col/>
+            </Row>
+          </Container>
+        </Route>
 
-      {/* 회원가입  */}
-      <Route path="/signup">
+        {/* 회원가입  */}
+        <Route path="/signup">
         <Container>
           <Row>
             <Col/>
@@ -132,7 +96,9 @@ function App() {
           </Row>
         </Container>
       </Route>
-    
+
+
+      </Switch>
     </div>
   );
 }
