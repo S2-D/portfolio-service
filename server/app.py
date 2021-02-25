@@ -17,7 +17,14 @@ def create_app():
     app.config['SECRET_KEY'] = SECRET_KEY
     CORS(app)
 
+    with app.app_context():
+        import db
+        db.init_db()
+
     import auth
     app.register_blueprint(auth.bp)
+
+    import portfolio
+    app.register_blueprint(portfolio.bp)    
 
     return app
