@@ -45,7 +45,7 @@ class Project(db.Model):
 
 class License(db.Model):
       id = db.Column(db.Integer, primary_key=True)
-      license_id = db.Column(db.Text, nullable=False)
+      license_nm = db.Column(db.Text, nullable=False)
       license_get_date = db.Column(db.Text, nullable=False)
       license_issuing_org = db.Column(db.Date, nullable=True)
       user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
@@ -76,7 +76,7 @@ def init_db():
       db.session.add(sample_project)
       db.session.commit()
       sample_license = License(
-            license_id="license_id1", license_get_date="license_get_date1", user_id=1
+            license_nm="license_nm1", license_get_date="license_get_date1", user_id=1
       )
       db.session.add(sample_license)
       db.session.commit()

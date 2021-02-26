@@ -34,7 +34,7 @@ project_parser.add_argument('project_et', required=True)
 # for License api
 license_parser = reqparse.RequestParser()
 license_parser.add_argument('id', required=True)
-license_parser.add_argument('license_id', required=True)
+license_parser.add_argument('license_nm', required=True)
 license_parser.add_argument('license_get_date', required=True)
 license_parser.add_argument('license_issuing_org', required=True)
 
@@ -129,10 +129,10 @@ class Project(Resource):
 class License(Resource):
     def post(self):
         args = license_parser.parse_args()
-        sql = "INSERT INTO `license` (`license_id`,`license_get_date`,`license_issuing_org`, `user_id`) VALUES (%s, %s, %s, %s)"
-        cursor.execute(sql, (args['license_id'], args['license_get_date'], args['license_issuing_org'], g.user[0] ))
+        sql = "INSERT INTO `license` (`license_nm`,`license_get_date`,`license_issuing_org`, `user_id`) VALUES (%s, %s, %s, %s)"
+        cursor.execute(sql, (args['license_nm'], args['license_get_date'], args['license_issuing_org'], g.user[0] ))
         db.commit()
-        return jsonify(status = "success", result = {"license_id": args["license_id"]})
+        return jsonify(status = "success", result = {"license_nm": args["license_nm"]})
     
     def get(self):
         sql = "SELECT * FROM `license` WHERE `user_id` = %s"
@@ -142,10 +142,10 @@ class License(Resource):
 
     def put(self):
         args = license_parser.parse_args()
-        sql = "UPDATE `license` SET license_id = %s, license_get_date= %s, license_issuing_org=%s WHERE `id` = %s"
-        cursor.execute(sql, (args['license_id'], args['license_get_date'], args['license_issuing_org'], args['id']))
+        sql = "UPDATE `license` SET license_nm = %s, license_get_date= %s, license_issuing_org=%s WHERE `id` = %s"
+        cursor.execute(sql, (args['license_nm'], args['license_get_date'], args['license_issuing_org'], args['id']))
         db.commit()
-        return jsonify(status = "success", result ={"id": args['id'], "license_id": args["license_id"], "license_get_date": args["license_get_date"] })
+        return jsonify(status = "success", result ={"id": args['id'], "license_nm": args["license_nm"], "license_get_date": args["license_get_date"] })
     
     def delete(self):
         args = license_parser.parse_args()
