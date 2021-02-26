@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Col, Form, Button, InputGroup } from 'react-bootstrap';
+import { Link, useHistory } from 'react-router-dom'
 
 import {Formik, ErrorMessage } from 'formik'
 import * as yup from 'yup'
@@ -26,9 +27,20 @@ const schema = yup.object().shape({
 
 function Signup() {
 
+  let history = useHistory();
   const post = (data) => {
     axios.post(`http://localhost:5000/auth/signup`, data)
-        .then(response => console.log("response: ", response.data.result))
+        .then(response => {
+          console.log("response: ", response.data.result)
+          if(response.data.status ==="success") {
+            alert("가입완료")
+            history.push('/login')
+          } else {
+            alert(response.data.result.error)
+            console.log(response)
+            history.push('/signup')
+          }
+  })
 }
   return (
     <Formik
@@ -48,11 +60,7 @@ function Signup() {
       {({
         handleSubmit,
         handleChange,
-        handleBlur,
         values,
-        touched,
-        isValid,
-        errors,
       }) => (
         <Form noValidate onSubmit={handleSubmit}>
           <Form.Row>

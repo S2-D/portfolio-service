@@ -10,7 +10,7 @@ const schema = yup.object().shape({
   email:yup
   .string()
   .required("아이디를 입력해주세요"),
-password: yup
+  password: yup
   .string()
   // .min(8, '8자리 이상으로 만들어주세요')
   // .max(16)
@@ -18,18 +18,32 @@ password: yup
   .required("비밀번호를 입력해주세요")
   });
 
+
 function Login() {
 
   let history = useHistory();
   const post = (data) => {
     axios.post(`http://127.0.0.1:5000/auth/login`, data)
-        .then(response => console.log("response: ", response.data.result))
+      .then(response => {
+        console.log("response: ", response)
+        if(response.data.status ==="success") {
+          alert("로그인완료")
+          console.log("완료", response.data.result.user_id)
+          window.user_id=response.data.result.user_id
+          console.log("user_id", window.user_id)
+          history.push('/')
+        } else {
+          alert(response.data.result.error)
+          console.log(response)
+          history.push('/login')
+        }
+  })
 }
   return (
     <Formik
       validationSchema={schema}
       onSubmit={values => {
-        console.log("input", values);    
+        // console.log("input", values);    
         post(values);
         history.push('/')
       }}
@@ -41,14 +55,11 @@ function Login() {
       {({
         handleSubmit,
         handleChange,
-        handleBlur,
-        values,
-        touched,
-        isValid,
-        errors,
+        values
       }) => (
         <Form noValidate onSubmit={handleSubmit}>
           <Form.Row>
+            
               {/* 아이디 */}
             <Form.Group controlId="validationFormik01">
               <Form.Label>아이디</Form.Label>
@@ -78,8 +89,8 @@ function Login() {
               <ErrorMessage name="password" component="p" />
             </Form.Group>
           </Form.Row>
-          <Button className="btn" variant="primary" type="submit">로그인</Button>
-          <Button className="btn" variant="dark" >
+          <Button className="one_btn" variant="primary" type="submit">로그인</Button>
+          <Button className="one_btn" variant="dark" >
                 구글계정으로 로그인
               </Button>
           <Link className="link" to="/signup">회원가입하기</Link>

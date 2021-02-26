@@ -4,7 +4,7 @@
   padding : 40px ;
 }
 
-.btn {
+.one_btn {
   margin:20px auto;
   display:flex;
   align-items:center;
@@ -22,3 +22,13 @@
   font-size: 12px;
   margin-bottom: 8px;
 }
+
+.portfolio-row{
+  margin-top:40px;
+}
+
+.edu {
+  padding: 40px ;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+} 
