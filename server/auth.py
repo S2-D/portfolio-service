@@ -2,23 +2,11 @@ from flask import Flask, Blueprint, g
 from flask_restful import reqparse, abort, Api, Resource
 from flask import jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from config import DB_CONNECT
-from app import login_required
-
-import pymysql
+from app import login_required, getDB
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 api = Api(bp)
-
-# mysql 연결설정
-db = pymysql.connect(
-        user = DB_CONNECT['username'],
-        passwd = DB_CONNECT['password'],
-        host = DB_CONNECT['server'],
-        port = 3306,
-        db = DB_CONNECT['dbname'],
-        charset = 'utf8'
-    )
+db = getDB()
 cursor = db.cursor()
 
 parser = reqparse.RequestParser()
@@ -53,6 +41,9 @@ def signup():
         # 비밀번호가 없다면?
         elif not confirm:
             error = '비밀번호가 유효하지 않습니다.'
+        # 비밀번호가 일치하지 않다면?
+        elif password != confirm:
+            error = '비밀번호가 일치하지 않습니다.'
         # 사용자명이 없다면?
         elif not username:
             error = '사용자명이 유효하지 않습니다.'
@@ -63,9 +54,6 @@ def signup():
         result = cursor.fetchone()
         if result is not None:
             error = '{} 계정은 이미 등록된 계정입니다.'.format(email)
-    
-        # error 확인
-        print('>>>>> error :',error)
 
         # error가 없다면 회원가입 진행
         if error is None:
@@ -90,7 +78,7 @@ def login():
 
         error = None
         
-        sql = 'SELECT email, password FROM user WHERE email = %s'
+        sql = 'SELECT email, password, id FROM user WHERE email = %s'
         cursor.execute(sql, (email,))
         user = cursor.fetchone()
         
@@ -109,7 +97,8 @@ def login():
             session.clear()
             # 지금 로그인한 유저의 정보로 session을 등록합니다.
             session['email'] = user[0]
-            return jsonify(status = "success", result = {"email": email, "session": session['email']})
+            session['id'] = user[2]
+            return jsonify(status = "success", result = {"email": email, "session": session['email'], "user_id":session['id']})
 
     return jsonify(status = "fail", result = {"error": error})
 
@@ -127,6 +116,7 @@ def load_logged_in_user():
     if email is None:
         g.user = None
     else:
-        sql = 'SELECT email, password FROM user WHERE email = %s'
+        sql = 'SELECT id, email FROM user WHERE email = %s'
         cursor.execute(sql, (email,))
         g.user = cursor.fetchone()
+        # g.user[0] = id, g.user[1] = email
