@@ -1,8 +1,12 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import Signup from './components/signup';
-import Login from './components/login';
-import Edu from './components/edu';
+import Signup from './components/auth/signup';
+import Login from './components/auth/login';
+import Edu from './components/portfolio/edu';
+import Awards from './components/portfolio/awards';
+import Project from './components/portfolio/project';
+import License from './components/portfolio/license';
+
 
 import {Link, Route, Switch} from 'react-router-dom'
 import React from 'react';
@@ -11,8 +15,6 @@ import axios from 'axios';
 
 
 function App() {
-  
-
   return (
     <div>
       {/* Nav */}
@@ -33,11 +35,22 @@ function App() {
         <Route exact path="/">
           <Container>
             <Row className="portfolio-row">
-              <Col md={4}></Col>
-              <Col md={8} className="edu"><Edu /></Col>
+              <Col md={8} className="pf-div">
+                <Edu />
+              </Col>
+              <Col md={8} className="pf-div">
+                <Awards />
+              </Col>
+              <Col md={8} className="pf-div">
+                <Project />
+              </Col>
+              <Col md={8} className="pf-div">
+                <License />
+              </Col>
             </Row>
           </Container>
         </Route>
+        
         {/* 로그인 */}
         <Route path="/login">
           <Container>

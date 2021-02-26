@@ -23,21 +23,17 @@ function Awards() {
   // let history = useHistory();
   const post = (data) => {
     axios.post(`http://localhost:5000/portfolio/awards`, data)
-        .then(response => {
-          console.log("response: ", response.data.result)
-          if(response.data.status ==="success") {
-            alert("성공")
-          } else {
-            alert("실패")
-            console.log(response)
-          }
-  })
-
-}
+      .then(response => {
+        console.log("response: ", response.data.result)
+      }).catch(() => {
+        console.log("fail")
+      })
+  }
   return (
     <Formik
       validationSchema={schema}
       onSubmit={values => {
+        values.user_id = window.user_id
         console.log(values);    
         alert(JSON.stringify(values, null, 2));
         post(values);
@@ -54,22 +50,19 @@ function Awards() {
         values,
       }) => (
         <Form noValidate onSubmit={handleSubmit}>
+          user_id :{window.user_id}
           <h3>수상이력</h3>
-          <Form.Row>
               {/* 수상내역 */}
             <Form.Group>
               <Form.Label>수상내역</Form.Label>
-
-              <Col>
                 <InputGroup hasValidation>
                     <Form.Control
                         type="text"
                         name="awards_nm"
                         value={values.awards_nm}
                         onChange={handleChange}
-                        />
+                    />
                 </InputGroup>
-              </Col>
               <ErrorMessage name="awards_nm" component="p" />
             </Form.Group>
 
@@ -84,8 +77,6 @@ function Awards() {
                 />
               <ErrorMessage name="awards_desc" component="p" />
             </Form.Group>
-
-          </Form.Row>
           <Button inline type="submit">확인</Button>
           <Button inline >취소</Button>
         </Form>
