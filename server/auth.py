@@ -9,11 +9,11 @@ api = Api(bp)
 db = getDB()
 cursor = db.cursor()
 
-parser = reqparse.RequestParser()
-parser.add_argument('email')
-parser.add_argument('password')
-parser.add_argument('confirm')
-parser.add_argument('username')
+auth_parser = reqparse.RequestParser()
+auth_parser.add_argument('email')
+auth_parser.add_argument('password')
+auth_parser.add_argument('confirm')
+auth_parser.add_argument('username')
 
 
 @bp.route('/signup', methods=('GET', 'POST'))
@@ -23,7 +23,7 @@ def signup():
     if request.method == 'POST':
 
         # 입력된 데이터를 가져온다
-        args = parser.parse_args()
+        args = auth_parser.parse_args()
         email = args['email']
         password = args['password']
         confirm = args['confirm']
@@ -72,7 +72,7 @@ def login():
     # POST 요청을 받았다면?
     if request.method == 'POST':
         # 입력된 데이터를 가져온다
-        args = parser.parse_args()
+        args = auth_parser.parse_args()
         email = args['email']
         password = args['password']
 
