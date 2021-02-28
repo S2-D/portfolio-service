@@ -55,20 +55,56 @@ def init_db():
       db.init_app(current_app)
       db.drop_all()
       db.create_all()
-      sample_user = User(
+      sample_user1 = User(
             username="sodam", email="a@gmail.com", password=generate_password_hash("1234", method="sha256")
       )
-      db.session.add(sample_user)
+      sample_user2 = User(
+            username="seonghyeok", email="b@gmail.com", password=generate_password_hash("1234", method="sha256")
+      )
+
+      sample_user3= User(
+            username="jinho", email="c@gmail.com", password=generate_password_hash("1234", method="sha256")
+      )
+      sample_user4 = User(
+            username="lana", email="d@gmail.com", password=generate_password_hash("1234", method="sha256")
+      )
+      sample_user5 = User(
+            username="jiyoung", email="e@gmail.com", password=generate_password_hash("1234", method="sha256")
+      )
+      sample_user6 = User(
+            username="sohee", email="f@gmail.com", password=generate_password_hash("1234", method="sha256")
+      )
+      db.session.add(sample_user1)
+      db.session.add(sample_user2)
+      db.session.add(sample_user3)
+      db.session.add(sample_user4)
+      db.session.add(sample_user5)
+      db.session.add(sample_user6)
+
       db.session.commit()
-      sample_edu = Edu(
+      sample_edu1 = Edu(
             edu_sc_nm="edu_sc_nm1", edu_major="edu_major1", edu_gd_ck=1, user_id=1
+      )
+      sample_edu2 = Edu(
+            edu_sc_nm="edu_sc_nm2", edu_major="edu_major2", edu_gd_ck=3, user_id=1
+      )
+      sample_edu3 = Edu(
+            edu_sc_nm="edu_sc_nm3", edu_major="edu_major3", edu_gd_ck=2, user_id=2
       )
       db.session.add(sample_edu)
       db.session.commit()
-      sample_awards = Awards(
+      sample_awards1 = Awards(
             awards_nm="awards_nm1", awards_desc="awards_desc1", user_id=1
       )
-      db.session.add(sample_awards)
+      sample_awards2 = Awards(
+            awards_nm="awards_nm2", awards_desc="awards_desc2", user_id=2
+      )
+      sample_awards3 = Awards(
+            awards_nm="awards_nm3", awards_desc="awards_desc3", user_id=2
+      )
+      db.session.add(sample_awards1)
+      db.session.add(sample_awards2)
+      db.session.add(sample_awards3)
       db.session.commit()
       sample_project = Project(
             project_nm="project_nm1", project_desc="project_desc1", user_id=1

@@ -1,13 +1,17 @@
-from flask import Flask, Blueprint, g
+from flask import Flask, Blueprint, g, Response
 from flask_restful import reqparse, abort, Api, Resource
 from flask import jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import login_required, getDB
+import json
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 api = Api(bp)
 db = getDB()
 cursor = db.cursor()
+
+resp = Response()
+resp.headers['Access-Control-Allow-Origin'] = '*'
 
 auth_parser = reqparse.RequestParser()
 auth_parser.add_argument('email')
@@ -89,7 +93,7 @@ def login():
         # 비밀번호가 틀렸을 때
         # user는 tuple 타입으로 데이터 반환, user[0]은 email user[1]은 password 
         if not (user == None or check_password_hash(user[1], password)):
-            error = 'password가 틀렸습니다.'
+            error = '비밀번호가 일치하지 않습니다.'
 
         # 정상적인 정보를 요청받았다면?
         if error is None:
@@ -97,8 +101,12 @@ def login():
             session.clear()
             # 지금 로그인한 유저의 정보로 session을 등록합니다.
             session['email'] = user[0]
-            session['id'] = user[2]
-            return jsonify(status = "success", result = {"email": email, "session": session['email'], "user_id":session['id']})
+
+            output = {"id": user[2], "session": session['email']}
+            resp.set_data(json.dumps(output))
+            resp.headers["Set-Cookie"] = "myfirstcookie=somecookievalue"
+
+            return resp
 
     return jsonify(status = "fail", result = {"error": error})
 
@@ -112,6 +120,7 @@ def logout():
 @bp.before_app_request
 def load_logged_in_user():
     email = session.get('email')
+    print(email)
 
     if email is None:
         g.user = None

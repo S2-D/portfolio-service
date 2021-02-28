@@ -8,13 +8,18 @@ import Project from './components/portfolio/project';
 import License from './components/portfolio/license';
 
 
-import {Link, Route, Switch} from 'react-router-dom'
+import Network from './components/network/network'
+
+
+import {Link, Route, Switch, useHistory} from 'react-router-dom'
+
 import React from 'react';
 import { Row, Container, Col, Form, Nav, Navbar, Button } from 'react-bootstrap';
 import axios from 'axios';
 
 
 function App() {
+  let history = useHistory();
   return (
     <div>
       {/* Nav */}
@@ -23,13 +28,16 @@ function App() {
         <Nav className="ml-auto">
           <Nav.Link as={Link} to="/login">로그인</Nav.Link>
           <Nav.Link as={Link} to="/">네트워크</Nav.Link>
-          <Nav.Link onClick={()=>{
+          <Nav.Link onClick={() => {
             axios.get('http://localhost:5000/auth/logout').then(response => {
+              if (response.data.status === "success") {
+                window.user_id = ''
+                history.push('/login')
+              }
             })
           }}>로그아웃</Nav.Link>
         </Nav>
       </Navbar>
-      
 
       <Switch>
         <Route exact path="/">
@@ -39,33 +47,34 @@ function App() {
                 <Edu />
               </Col>
               <Col md={8} className="pf-div">
-                <Awards />
+                {/* <Awards /> */}
               </Col>
               <Col md={8} className="pf-div">
-                <Project />
+                {/* <Project /> */}
               </Col>
               <Col md={8} className="pf-div">
-                <License />
+                {/* <License /> */}
               </Col>
             </Row>
           </Container>
         </Route>
-        
+
         {/* 로그인 */}
         <Route path="/login">
           <Container>
-            <Row>    
-              <Col/>
-              <Col xs={6} md={4} className="login-form">
-                <Login/>
+            <Row>
+              <Col />
+              <Col xs={6} className="login-form">
+                <Login />
               </Col>
-              <Col/>
+              <Col />
             </Row>
           </Container>
         </Route>
 
         {/* 회원가입  */}
         <Route path="/signup">
+
         <Container>
           <Row>
             <Col/>
@@ -76,10 +85,14 @@ function App() {
           </Row>
         </Container>
       </Route>
+
+      <Route path="/network">
+        <Network></Network>
+      </Route>
+
       </Switch>
     </div>
   );
 }
-
 
 export default App;

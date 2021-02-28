@@ -1,10 +1,9 @@
-from flask import Flask, g, jsonify
+from flask import Flask, g, jsonify, Response
 from flask_cors import CORS
 from config import DB_CONNECT, SECRET_KEY
 
 import functools
 import pymysql
-
 
 # 데코레이터 함수
 def login_required(view):
@@ -34,15 +33,20 @@ def getDB():
 def create_app():
     app = Flask(__name__)
     app.config["SECRET_KEY"] = SECRET_KEY
-    CORS(app)
+
+    CORS(app, resources={r'*': {'origins': '*'}}, supports_credentials=True)
 
     import auth
 
     app.register_blueprint(auth.bp)
 
-    import portfolio
+    from portfolio import portfolio
 
     app.register_blueprint(portfolio.bp)
+
+    import network
+
+    app.register_blueprint(network.bp)
 
     with app.app_context():
         import db
