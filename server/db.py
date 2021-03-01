@@ -91,7 +91,9 @@ def init_db():
       sample_edu3 = Edu(
             edu_sc_nm="edu_sc_nm3", edu_major="edu_major3", edu_gd_ck=2, user_id=2
       )
-      db.session.add(sample_edu)
+      db.session.add(sample_edu1)
+      db.session.add(sample_edu2)
+      db.session.add(sample_edu3)
       db.session.commit()
       sample_awards1 = Awards(
             awards_nm="awards_nm1", awards_desc="awards_desc1", user_id=1

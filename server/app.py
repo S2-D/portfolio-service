@@ -1,19 +1,12 @@
 from flask import Flask, g, jsonify, Response
 from flask_cors import CORS
 from config import DB_CONNECT, SECRET_KEY
+from flask_jwt_extended import JWTManager
 
 import functools
 import pymysql
+ 
 
-# 데코레이터 함수
-def login_required(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if g.user is None:
-            return jsonify(status="fail", result={"error": "로그인 후 이용해주세요."})
-        return view(**kwargs)
-
-    return wrapped_view
 
 
 # pymysql 연결설정
@@ -33,6 +26,9 @@ def getDB():
 def create_app():
     app = Flask(__name__)
     app.config["SECRET_KEY"] = SECRET_KEY
+    app.config["JWT_SECRET_KEY"] = SECRET_KEY
+
+    jwt = JWTManager(app)
 
     CORS(app, resources={r'*': {'origins': '*'}}, supports_credentials=True)
 
@@ -40,9 +36,21 @@ def create_app():
 
     app.register_blueprint(auth.bp)
 
-    from portfolio import portfolio
+    import edu
 
-    app.register_blueprint(portfolio.bp)
+    app.register_blueprint(edu.bp)
+
+    import awards
+
+    app.register_blueprint(awards.bp)
+
+    import project
+
+    app.register_blueprint(project.bp)
+
+    import license
+
+    app.register_blueprint(license.bp)
 
     import network
 

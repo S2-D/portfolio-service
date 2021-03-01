@@ -6,35 +6,36 @@ import Edu from './components/portfolio/edu';
 import Awards from './components/portfolio/awards';
 import Project from './components/portfolio/project';
 import License from './components/portfolio/license';
-
-
 import Network from './components/network/network'
-
 
 import {Link, Route, Switch, useHistory} from 'react-router-dom'
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Container, Col, Form, Nav, Navbar, Button } from 'react-bootstrap';
 import axios from 'axios';
 
 
 function App() {
   let history = useHistory();
+
   return (
     <div>
       {/* Nav */}
       <Navbar className="" bg="dark" variant="dark">
-        <Navbar.Brand href="#home">Portfolio </Navbar.Brand>
+        <Navbar.Brand href="/">Portfolio </Navbar.Brand>
         <Nav className="ml-auto">
           <Nav.Link as={Link} to="/login">로그인</Nav.Link>
-          <Nav.Link as={Link} to="/">네트워크</Nav.Link>
+          <Nav.Link as={Link} to="/network">네트워크</Nav.Link>
           <Nav.Link onClick={() => {
-            axios.get('http://localhost:5000/auth/logout').then(response => {
-              if (response.data.status === "success") {
-                window.user_id = ''
-                history.push('/login')
-              }
-            })
+            if(window.confirm('로그아웃 하시겠습니까?')) {
+              axios.get(`http://${window.location.hostname}:5000/auth/logout`)
+              .then(response => {
+                if (response.data.status === "success") {
+                  localStorage.setItem('access_token', '');
+                  history.push('/login')
+                }
+              })
+            }
           }}>로그아웃</Nav.Link>
         </Nav>
       </Navbar>
@@ -42,20 +43,21 @@ function App() {
       <Switch>
         <Route exact path="/">
           <Container>
-            <Row className="portfolio-row">
+            {/* <Row className="portfolio-row"> */}
+              <div><h3>sodam</h3></div>
               <Col md={8} className="pf-div">
                 <Edu />
               </Col>
               <Col md={8} className="pf-div">
-                {/* <Awards /> */}
+                <Awards />
+              </Col>
+              {/* <Col md={8} className="pf-div">
+                <Project />
               </Col>
               <Col md={8} className="pf-div">
-                {/* <Project /> */}
-              </Col>
-              <Col md={8} className="pf-div">
-                {/* <License /> */}
-              </Col>
-            </Row>
+                <License />
+              </Col> */}
+            {/* </Row> */}
           </Container>
         </Route>
 
@@ -78,7 +80,7 @@ function App() {
         <Container>
           <Row>
             <Col/>
-            <Col className="login-form" xs={8} md={5} >
+            <Col className="login-form" xs={6}>
             <Signup />
             </Col>
             <Col/>

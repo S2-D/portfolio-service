@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
-import { Link, useHistory } from 'react-router-dom'
+import { Link, useHistory, Redirect } from 'react-router-dom'
 
 import { Formik, ErrorMessage } from 'formik'
 import * as yup from 'yup'
@@ -24,28 +24,40 @@ const schema = yup.object().shape({
 });
 
 function Edu() {
-  let [form, setForm] = useState(false);
-  let [edu, setEdu] = useState([]);
-  let [userid, setUserid] =useState(''); 
+
+  const [form, setForm] = useState(false);
+  const [edu, setEdu] = useState([]);
+  const [userid, setUserid] = useState('');
+  const [isLogin, setIsLogin] = useState(false);
 
   const access_token = localStorage.getItem('access_token');
   axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+  
+  let history = useHistory();
 
-  useEffect(()=>
+  useEffect(()=>{
     axios.get(`http://${window.location.hostname}:5000/auth/protected`, {})
-    .then(response => {
-      getEduList(response.data.logged_in_as);
-      setUserid(response.data.logged_in_as);
-    })
-  ,[]);
+      .then(response => {
+
+        getEduList(response.data.logged_in_as);
+        setUserid(response.data.logged_in_as);
+        setIsLogin(true);
+
+      }).catch((error) => {
+        alert('로그인 후 이용해주세요.');
+        history.push('/login');
+        return;
+      })
+  },[])
 
   const getEduList = (data) => {
     axios.get(`http://${window.location.hostname}:5000/edu/?user_id=${data}`, {})
       .then(response => {
+        console.log(response)
         setEdu(response.data.result)
-        console.log("edu",edu)
+
       })
-  }
+    }
 
   const postEdu = (data) => {
     data.user_id = userid;
@@ -56,35 +68,34 @@ function Edu() {
       }).catch(() => {
         console.log("fail")
       })
-    }
+  }
 
   return (
     <div>
-      <h3>학력</h3>
-      유저아이디 : {userid}
-      <br/>
+      {isLogin ? <div>
+        <h3>학력</h3>
+      <br />
       {
-        edu.map((data) =>(
-          <EduList key ={data.id} edu_sc_nm={data.edu_sc_nm}/>
+        edu.map((data) => (
+          <EduList key={data.id} edu_sc_nm={data.edu_sc_nm} />
         ))
       }
-      
+
 
       <Button onClick={() => { setForm(!form) }}>
         {
-          form == true
+          form
             ? '닫기'
             : '작성하기'
         }
       </Button>
       {
-        form == true
+        form
           ? <Formik
-            validationSchema={schema}
+            validationSchema={schema}a
             onSubmit={(values) => {
-              values.user_id = window.user_id
               console.log("values", values);
-              alert(JSON.stringify(values, null, 2));
+              // alert(JSON.stringify(values, null, 2));
               postEdu(values);
             }}
             initialValues={{
@@ -159,18 +170,20 @@ function Edu() {
                     <ErrorMessage name="edu_gd_ck" component="p" />
                   </Form.Group>
                 </fieldset>
-                <Button inline type="submit">확인</Button>
+                <div>
+                  <Button inline type="submit">확인</Button>
+                </div>              
               </Form>
             )}
           </Formik>
           : null
       }
-
+      </div> : <div></div>}
     </div>
   );
 }
 
-function EduList(props){
+function EduList(props) {
   return (
     <div key={props.key}>
       <h4>

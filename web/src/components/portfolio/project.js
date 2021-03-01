@@ -1,131 +1,186 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
-import { Link, useHistory } from 'react-router-dom';
-import axios from 'axios';
+import { Link, useHistory } from 'react-router-dom'
 
-//Form
 import { Formik, ErrorMessage } from 'formik'
 import * as yup from 'yup'
-
-// DatePicker
-import DatePicker from "react-datepicker";
-import { ko } from "date-fns/esm/locale";
-import "react-datepicker/dist/react-datepicker.css";
-
+import axios from 'axios';
 
 const schema = yup.object().shape({
-  project_nm: yup
+  edu_sc_nm: yup
     .string()
     .required(),
-  project_desc: yup
+  edu_major: yup
     .string()
     .required(),
-  project_st: yup
-    .string()
-    .required(),
-  project_et: yup
-    .string()
-    .required(),
+  edu_gd_ck: yup
+    .number()
+    .integer(),
+  // .required()
   user_id: yup
-    .string()
-  // .number()
-  // .integer()
+    .number()
+  //   // .number()
+  //   // .integer()
 });
 
+function Edu() {
+  let [form, setForm] = useState(false);
+  let [edu, setEdu] = useState([]);
+  let [userid, setUserid] = useState('');
 
-function Project() {
-  // let history = useHistory();
-  const post = (data) => {
-    axios.post(`http://localhost:5000/portfolio/project`, data)
+  const access_token = localStorage.getItem('access_token');
+  axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+
+  useEffect(() =>
+    axios.get(`http://${window.location.hostname}:5000/auth/protected`, {})
       .then(response => {
-        console.log("response: ", response.data.result)
+        getEduList(response.data.logged_in_as);
+        setUserid(response.data.logged_in_as);
+      })
+    , []);
+
+  const getEduList = (data) => {
+    axios.get(`http://${window.location.hostname}:5000/edu/?user_id=${data}`, {})
+      .then(response => {
+        setEdu(response.data.result)
+        console.log("edu", edu)
+      })
+  }
+
+  const postEdu = (data) => {
+    data.user_id = userid;
+    axios.post(`http://${window.location.hostname}:5000/edu/`, data)
+      .then(response => {
+        console.log("response: ", response.data.result);
+        getEduList(userid);
       }).catch(() => {
         console.log("fail")
       })
   }
 
-  const [startDate, setStartDate] = useState();
-  const [endDate, setEndDate] = useState();
-
-
   return (
-    <Formik
-      validationSchema={schema}
-      onSubmit={values => {
-        values.user_id = window.user_id
-        console.log(values);
-        alert(JSON.stringify(values, null, 2));
-        post(values);
-      }}
-      initialValues={{
-        project_nm: '',
-        project_desc: '',
-        project_st: '',
-        project_et: '',
-        user_id: ''
-      }}
-    >
-      {({
-        handleSubmit,
-        handleChange,
-        values,
-      }) => (
-        <Form noValidate onSubmit={handleSubmit}>
-          user_id :{window.user_id}
+    <div>
+      <h3>학력</h3>
+      <br />
+      {
+        edu.map((data) => (
+          <EduList key={data.id} edu_sc_nm={data.edu_sc_nm} />
+        ))
+      }
 
-          <h3>프로젝트</h3>
-          {/* 제목 */}
-          <Form.Group>
-            <Form.Label>프로젝트 제목</Form.Label>
-            <InputGroup hasValidation>
-              <Form.Control
-                type="text"
-                name="project_nm"
-                value={values.project_nm}
-                onChange={handleChange}
-              />
-            </InputGroup>
-            <ErrorMessage name="project_nm" component="p" />
-          </Form.Group>
 
-          {/* 상세내역  */}
-          <Form.Group>
-            <Form.Label>상세내역</Form.Label>
-            <Form.Control
-              type="text"
-              name="project_desc"
-              value={values.project_desc}
-              onChange={handleChange}
-            />
-            <ErrorMessage name="project_desc" component="p" />
-          </Form.Group>
+      <Button onClick={() => { setForm(!form) }}>
+        {
+          form
+            ? '닫기'
+            : '작성하기'
+        }
+      </Button>
+      {
+        form
+          ? <Formik
+            validationSchema={schema}
+            onSubmit={(values) => {
+              console.log("values", values);
+              // alert(JSON.stringify(values, null, 2));
+              postEdu(values);
+            }}
+            initialValues={{
+              edu_sc_nm: '',
+              edu_major: '',
+              edu_gd_ck: 1,
+              user_id: ''
+            }}
+          >
+            {({
+              handleSubmit,
+              handleChange,
+              values,
+            }) => (
+              <Form noValidate onSubmit={handleSubmit}>
+                {/* 학교이름*/}
+                <Form.Group>
+                  <Form.Label >학교이름</Form.Label>
+                  <InputGroup hasValidation>
+                    <Form.Control
+                      type="text"
+                      name="edu_sc_nm"
+                      value={values.edu_sc_nm}
+                      onChange={handleChange}
+                    />
+                  </InputGroup>
+                  <ErrorMessage name="edu_sc_nm" component="p" />
+                </Form.Group>
+                {/* 전공  */}
+                <Form.Group>
+                  <Form.Label>전공</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="edu_major"
+                    value={values.edu_major}
+                    onChange={handleChange}
+                  />
+                  <ErrorMessage name="edu_major" component="p" />
+                </Form.Group>
 
-          <DatePicker
-            locale={ko}	// 언어설정 기본값은 영어
-            dateFormat="yyyy-MM-dd"	// 날짜 형식 설정
-            className="input-datepicker"	// 클래스 명 지정 css주기 위해
-            closeOnScroll={true}	// 스크롤을 움직였을 때 자동으로 닫히도록 설정 기본값 false
-            placeholderText="시작일"	// placeholder
-            selected={startDate}	// value
-            onChange={(date) => setStartDate(date)}	// 날짜를 선택하였을 때 실행될 함수
-          />
-          <DatePicker
-            locale={ko}
-            dateFormat="yyyy-MM-dd"
-            className="input-datepicker"
-            closeOnScroll={true}
-            placeholderText="종료일"
-            selected={endDate}
-            onChange={(date) => setEndDate(date)}
-          />
-          <div>
-            <Button inline type="submit">확인</Button>
-            <Button inline >취소</Button>
-          </div>
-        </Form>
-      )}
-    </Formik>
+                {/* 상태 */}
+                <fieldset>
+                  <Form.Group as={Row}>
+                    <Form.Check
+                      type="radio"
+                      inline
+                      label="재학중"
+                      value="1"
+                      name="formHorizontalRadios"
+                    />
+                    <Form.Check
+                      type="radio"
+                      inline
+                      label="학사졸업"
+                      value="2"
+                      name="formHorizontalRadios"
+                    />
+                    <Form.Check
+                      type="radio"
+                      inline
+                      label="석사졸업"
+                      value="3"
+                      name="formHorizontalRadios"
+                    />
+                    <Form.Check
+                      type="radio"
+                      inline
+                      label="박사졸업"
+                      value="4"
+                      name="formHorizontalRadios"
+                    />
+                    <ErrorMessage name="edu_gd_ck" component="p" />
+                  </Form.Group>
+                </fieldset>
+                <div>
+                  <Button inline type="submit">확인</Button>
+                </div>              
+              </Form>
+            )}
+          </Formik>
+          : null
+      }
+
+    </div>
   );
 }
 
-export default Project;
+function EduList(props) {
+  return (
+    <div key={props.key}>
+      <h4>
+        {props.edu_sc_nm}
+      </h4>
+      <p>졸업</p>
+      <hr />
+    </div>
+  )
+}
+
+export default Edu;
+
