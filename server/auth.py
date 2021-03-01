@@ -1,17 +1,13 @@
-from flask import Flask, Blueprint, g, Response
+from flask import Flask, Blueprint, jsonify, request
 from flask_restful import reqparse, abort, Api, Resource
-from flask import jsonify, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import login_required, getDB
-import json
+from app import getDB
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 api = Api(bp)
 db = getDB()
 cursor = db.cursor()
-
-resp = Response()
-resp.headers['Access-Control-Allow-Origin'] = '*'
 
 auth_parser = reqparse.RequestParser()
 auth_parser.add_argument('email')
@@ -97,35 +93,22 @@ def login():
 
         # 정상적인 정보를 요청받았다면?
         if error is None:
-            # 로그인을 위해 기존 session을 비웁니다.
-            session.clear()
-            # 지금 로그인한 유저의 정보로 session을 등록합니다.
-            session['email'] = user[0]
+            # access_token 생성
+            access_token = create_access_token(identity=user[2])
 
-            output = {"id": user[2], "session": session['email']}
-            resp.set_data(json.dumps(output))
-            resp.headers["Set-Cookie"] = "myfirstcookie=somecookievalue"
-
-            return resp
+            return jsonify(status = "success", result = {"access_token": access_token})
 
     return jsonify(status = "fail", result = {"error": error})
 
 
 @bp.route('/logout')
 def logout():
-    session.clear()
     return jsonify(status = "success", result = {"msg": "logout"})
 
 
-@bp.before_app_request
-def load_logged_in_user():
-    email = session.get('email')
-    print(email)
-
-    if email is None:
-        g.user = None
-    else:
-        sql = 'SELECT id, email FROM user WHERE email = %s'
-        cursor.execute(sql, (email,))
-        g.user = cursor.fetchone()
-        # g.user[0] = id, g.user[1] = email
+@bp.route('/protected')
+@jwt_required()
+def protected():
+    # 복호화
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user)

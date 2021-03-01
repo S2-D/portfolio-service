@@ -29,7 +29,7 @@ function Signup() {
 
   let history = useHistory();
   const post = (data) => {
-    axios.post(`http://localhost:5000/auth/signup`, data)
+    axios.post(`http://${window.location.hostname}:5000/auth/signup`, data)
         .then(response => {
           console.log("response: ", response.data.result)
           if(response.data.status ==="success") {

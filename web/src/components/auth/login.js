@@ -7,11 +7,6 @@ import * as yup from 'yup'
 import axios from 'axios';
 
 
-axios.create({
-	baseURL : `https://test-b.com`,
-    withCredentials: true
-})
-
 const schema = yup.object().shape({
   email: yup
     .string()
@@ -29,17 +24,20 @@ function Login() {
 
   let history = useHistory();
   const post = (data) => {
-    axios.post(`http://127.0.0.1:5000/auth/login`, data, { withCreadentials: true })
+    axios.post(`http://${window.location.hostname}:5000/auth/login`, data)
       .then(response => {
+        // console.log(response.data.result.access_token)
         if (response.data.status === "success") {
-          window.user_id = response.data.result.user_id
+          const access_token = response.data.result.access_token;
+          localStorage.setItem('access_token', access_token);
+
+          axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+
           history.push('/')
         } else {
-          console.log(response)
-          window.user_id = response.data.email
-          history.push('/')
-          //alert(response.data.result.error)
+          history.push('/login')
         }
+
       })
   }
   return (
@@ -77,44 +75,6 @@ function Login() {
           <Button variant="primary" type="submit">로그인</Button>
           <Link className="link" to="/signup">회원가입하기</Link>
         </Form>
-        // <Form noValidate onSubmit={handleSubmit}>
-        //   <Form.Row>
-
-        //     {/* 아이디 */}
-        //     <Form.Group controlId="validationFormik01">
-        //       <Form.Label>아이디</Form.Label>
-        //       <InputGroup hasValidation>
-        //         <InputGroup.Prepend>
-        //           <InputGroup.Text id="inputGroupPrepend">@</InputGroup.Text>
-        //         </InputGroup.Prepend>
-        //         <Form.Control
-        //           type="text"
-        //           name="email"
-        //           value={values.email}
-        //           onChange={handleChange}
-        //         />
-        //       </InputGroup>
-        //       <ErrorMessage name="email" component="p" />
-        //     </Form.Group>
-
-        //     {/* 비밀번호  */}
-        //     <Form.Group controlId="validationFormik02">
-        //       <Form.Label>비밀번호</Form.Label>
-        //       <Form.Control
-        //         type="password"
-        //         name="password"
-        //         value={values.pasword}
-        //         onChange={handleChange}
-        //       />
-        //       <ErrorMessage name="password" component="p" />
-        //     </Form.Group>
-        //   </Form.Row>
-        //   <Button className="one_btn" variant="primary" type="submit">로그인</Button>
-        //   <Button className="one_btn" variant="dark" >
-        //     구글계정으로 로그인
-        //       </Button>
-        //   <Link className="link" to="/signup">회원가입하기</Link>
-        // </Form>
       )}
     </Formik>
   );
