@@ -1,21 +1,20 @@
-from flask import Flask, Blueprint, g
+from flask import Flask, Blueprint, jsonify, request
 from flask_restful import reqparse, abort, Api, Resource
-from flask import jsonify, request, session
 from config import DB_CONNECT
-from app import login_required, getDB
+from app import getDB
+from flask_jwt_extended import jwt_required
 
-bp = Blueprint('edu', __name__, url_prefix='/portfolio/edu')
+bp = Blueprint('edu', __name__, url_prefix='/edu')
 api = Api(bp)
 db = getDB()
 cursor = db.cursor()
 
-
-# for Edu api
+# for Edu apia
 edu_parser = reqparse.RequestParser()
-edu_parser.add_argument('id', required=True)
-edu_parser.add_argument('edu_sc_nm', required=True)
-edu_parser.add_argument('edu_major', required=True)
-edu_parser.add_argument('edu_gd_ck', required=True)
+edu_parser.add_argument('user_id')
+edu_parser.add_argument('edu_sc_nm')
+edu_parser.add_argument('edu_major')
+edu_parser.add_argument('edu_gd_ck')
 
 # for Awards api
 # awards_parser = reqparse.RequestParser()
@@ -40,18 +39,25 @@ edu_parser.add_argument('edu_gd_ck', required=True)
 
 
 class Edu(Resource):
+    
     def post(self):
         args = edu_parser.parse_args()
         sql = "INSERT INTO `edu` (`edu_sc_nm`,`edu_major`,`edu_gd_ck`,`user_id`) VALUES (%s, %s, %s, %s)"
-        cursor.execute(sql, (args['edu_sc_nm'], args['edu_major'], args['edu_gd_ck'], 1))
+        cursor.execute(sql, (args['edu_sc_nm'], args['edu_major'], args['edu_gd_ck'], args['user_id']))
         db.commit()
         return jsonify(status = "success", result = {"edu_sc_nm": args["edu_sc_nm"]})
     
     def get(self):
+        result = []
         args = edu_parser.parse_args()
-        sql = "SELECT * FROM `edu` WHERE `id` = %s"
-        cursor.execute(sql, (2))
-        result = cursor.fetchall()
+        sql = "SELECT edu_sc_nm, edu_major, edu_gd_ck FROM `edu` WHERE user_id = %s"
+        cursor.execute(sql, (args['user_id']))
+        edus = cursor.fetchall()
+        for edu in edus:
+            result.append(
+                {'edu_sc_nm': edu[0], 'edu_major': edu[1] , 'edu_gd_ck': edu[2]}
+            )
+
         return jsonify(status = "success", result = result)
 
     def put(self):
