@@ -25,49 +25,50 @@ const schema = yup.object().shape({
 
 function Edu() {
   let [form, setForm] = useState(false);
-  let [eduNm, seteduNm] = useState(["엘리스대학교","엘리스대학원"])
-  // let [titleId, setTitleId] = useState(0);
+  let [edu, setEdu] = useState([]);
+  let [userid, setUserid] =useState(''); 
 
-  let data = {
-    id: window.user_id
-  }
+  const access_token = localStorage.getItem('access_token');
+  axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
   useEffect(()=>
-    axios.get('http://localhost:5000/portfolio', data).then(response => {
-      console.log(response)
-      if (response.data.status === "success") {
-        console.log(response);
-      }
+    axios.get(`http://${window.location.hostname}:5000/auth/protected`, {})
+    .then(response => {
+      getEduList(response.data.logged_in_as);
+      setUserid(response.data.logged_in_as);
     })
-  )
+  ,[]);
 
-  const post = (data) => {
-    axios.post(`http://localhost:5000/portfolio/edu`, data)
+  const getEduList = (data) => {
+    axios.get(`http://${window.location.hostname}:5000/edu/?user_id=${data}`, {})
       .then(response => {
-        console.log("response: ", response.data.result)
+        setEdu(response.data.result)
+        console.log("edu",edu)
+      })
+  }
+
+  const postEdu = (data) => {
+    data.user_id = userid;
+    axios.post(`http://${window.location.hostname}:5000/edu/`, data)
+      .then(response => {
+        console.log("response: ", response.data.result);
+        getEduList(userid);
       }).catch(() => {
         console.log("fail")
       })
-  }
+    }
 
   return (
     <div>
       <h3>학력</h3>
+      유저아이디 : {userid}
       <br/>
       {
-        eduNm.map(function(title,i) {
-          return (
-            <div key={i}>
-              <h4>
-                {title}
-              </h4>
-              <p>졸업</p>
-              <hr/>
-            </div>
-          )
-        })
+        edu.map((data) =>(
+          <EduList key ={data.id} edu_sc_nm={data.edu_sc_nm}/>
+        ))
       }
-
+      
 
       <Button onClick={() => { setForm(!form) }}>
         {
@@ -84,7 +85,7 @@ function Edu() {
               values.user_id = window.user_id
               console.log("values", values);
               alert(JSON.stringify(values, null, 2));
-              post(values);
+              postEdu(values);
             }}
             initialValues={{
               edu_sc_nm: '',
@@ -99,7 +100,6 @@ function Edu() {
               values,
             }) => (
               <Form noValidate onSubmit={handleSubmit}>
-                user_id :{window.user_id}
                 {/* 학교이름*/}
                 <Form.Group>
                   <Form.Label >학교이름</Form.Label>
@@ -160,7 +160,6 @@ function Edu() {
                   </Form.Group>
                 </fieldset>
                 <Button inline type="submit">확인</Button>
-                <Button inline onClick={()=>{setForm(false)}} >취소</Button>
               </Form>
             )}
           </Formik>
@@ -171,4 +170,17 @@ function Edu() {
   );
 }
 
+function EduList(props){
+  return (
+    <div key={props.key}>
+      <h4>
+        {props.edu_sc_nm}
+      </h4>
+      <p>졸업</p>
+      <hr />
+    </div>
+  )
+}
+
 export default Edu;
+
