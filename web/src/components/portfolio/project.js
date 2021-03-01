@@ -36,7 +36,7 @@ const schema = yup.object().shape({
 function Project() {
   // let history = useHistory();
   const post = (data) => {
-    axios.post(`http://localhost:5000/portfolio/project`, data)
+    axios.post(`http://${window.location.hostname}:5000/portfolio/project`, data)
       .then(response => {
         console.log("response: ", response.data.result)
       }).catch(() => {

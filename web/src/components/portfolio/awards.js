@@ -20,9 +20,17 @@ const schema = yup.object().shape({
   });
 
 function Awards() {
-  // let history = useHistory();
+  let [form, setForm] = useState(false);
+  let [award, setAward] = useState([]);
+  let [userid, setUserid] =useState(''); 
+  
+  const access_token = localStorage.getItem('access_token');
+  axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+
+
+
   const post = (data) => {
-    axios.post(`http://localhost:5000/portfolio/awards`, data)
+    axios.post(`http://${window.location.hostname}:5000/portfolio/awards`, data)
       .then(response => {
         console.log("response: ", response.data.result)
       }).catch(() => {
