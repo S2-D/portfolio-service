@@ -51,10 +51,10 @@ function App() {
               <Col md={8} className="pf-div">
                 <Awards />
               </Col>
-              {/* <Col md={8} className="pf-div">
+              <Col md={8} className="pf-div">
                 <Project />
               </Col>
-              <Col md={8} className="pf-div">
+              {/* <Col md={8} className="pf-div">
                 <License />
               </Col> */}
             {/* </Row> */}
