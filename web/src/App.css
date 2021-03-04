@@ -4,14 +4,30 @@
   padding : 40px ;
 }
 
-.btn {
+.one_btn {
   margin:20px auto;
   display:flex;
   align-items:center;
 }
 
 .link{
-  display: flex;
-  margin-top : 30px;
-  margin-left: 100px;
+  margin-left: 40px;
 }
+
+.msg {
+  display: flex;
+  color:rgba(0, 0, 0, 0.5);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.portfolio-row{
+  margin-top:40px;
+}
+
+.pf-div {
+  margin : 10px;
+  padding: 40px ;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+} 
