@@ -5,8 +5,13 @@ import Login from './components/auth/login';
 import Edu from './components/portfolio/edu';
 import Awards from './components/portfolio/awards';
 import Project from './components/portfolio/project';
-import License from './components/portfolio/license';
+//import License from './components/portfolio/license';
 import Network from './components/network/network'
+import HookFormLogin from './HookFormLogin'
+
+import OutlinedCard from './components/profile/profile'
+
+
 
 import {Link, Route, Switch, useHistory} from 'react-router-dom'
 
@@ -43,20 +48,20 @@ function App() {
       <Switch>
         <Route exact path="/">
           <Container>
+
             {/* <Row className="portfolio-row"> */}
-              <div><h3>sodam</h3></div>
               <Col md={8} className="pf-div">
                 <Edu />
               </Col>
               <Col md={8} className="pf-div">
                 <Awards />
               </Col>
-              <Col md={8} className="pf-div">
+              {/* <Col md={8} className="pf-div">
                 <Project />
-              </Col>
+              </Col> */}
               {/* <Col md={8} className="pf-div">
                 <License />
-              </Col> */}
+              </Col>
             {/* </Row> */}
           </Container>
         </Route>
@@ -67,7 +72,8 @@ function App() {
             <Row>
               <Col />
               <Col xs={6} className="login-form">
-                <Login />
+                {/* <Login /> */}
+                <HookFormLogin />
               </Col>
               <Col />
             </Row>

@@ -1,12 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
 import { Link, useHistory, Redirect } from 'react-router-dom'
+import { useForm, Controller } from "react-hook-form";
+import {
+  TextField,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  ThemeProvider,
+  createMuiTheme
+} from "@material-ui/core";
+import { yupResolver } from '@hookform/resolvers/yup';
 
-import { Formik, ErrorMessage } from 'formik'
+
+
 import * as yup from 'yup'
 import axios from 'axios';
 
-const schema = yup.object().shape({
+import './edu.css';
+
+const EduSchema = yup.object().shape({
   edu_sc_nm: yup
     .string()
     .required(),
@@ -24,6 +37,12 @@ const schema = yup.object().shape({
 });
 
 function Edu() {
+  const { register, control, handleSubmit, errors } = useForm({ resolver: yupResolver(EduSchema) });
+  const onSubmit = (data) => {
+    console.log('data', data);
+    alert(JSON.stringify(data, null, 2));
+    postEdu(data);
+  };
 
   const [form, setForm] = useState(false);
   const [edu, setEdu] = useState([]);
@@ -32,10 +51,10 @@ function Edu() {
 
   const access_token = localStorage.getItem('access_token');
   axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-  
+
   let history = useHistory();
 
-  useEffect(()=>{
+  useEffect(() => {
     axios.get(`http://${window.location.hostname}:5000/auth/protected`, {})
       .then(response => {
 
@@ -48,16 +67,15 @@ function Edu() {
         history.push('/login');
         return;
       })
-  },[])
+  }, [])
 
   const getEduList = (data) => {
     axios.get(`http://${window.location.hostname}:5000/edu/?user_id=${data}`, {})
       .then(response => {
-        console.log(response)
-        setEdu(response.data.result)
-
+        console.log(response);
+        setEdu(response.data.result);
       })
-    }
+  }
 
   const postEdu = (data) => {
     data.user_id = userid;
@@ -70,127 +88,91 @@ function Edu() {
       })
   }
 
+  const theme = createMuiTheme({
+    palette: {
+      type: "dark"
+    }
+  });
+
   return (
     <div>
+      {/* <OutlinedCard/> */}
       {isLogin ? <div>
-        <h3>학력</h3>
-      <br />
-      {
-        edu.map((data) => (
-          <EduList key={data.id} edu_sc_nm={data.edu_sc_nm} />
-        ))
-      }
-
-
-      <Button onClick={() => { setForm(!form) }}>
+        <label><h3>학력</h3></label>
+        <br />
+        {
+          edu.map((data) => (
+            <EduList key={data.id} data={data} />
+          ))
+        }
+        <Button onClick={() => { setForm(!form) }}>
+          {
+            form
+              ? '닫기'
+              : '작성하기'
+          }
+        </Button>
         {
           form
-            ? '닫기'
-            : '작성하기'
-        }
-      </Button>
-      {
-        form
-          ? <Formik
-            validationSchema={schema}a
-            onSubmit={(values) => {
-              console.log("values", values);
-              // alert(JSON.stringify(values, null, 2));
-              postEdu(values);
-            }}
-            initialValues={{
-              edu_sc_nm: '',
-              edu_major: '',
-              edu_gd_ck: 1,
-              user_id: ''
-            }}
-          >
-            {({
-              handleSubmit,
-              handleChange,
-              values,
-            }) => (
-              <Form noValidate onSubmit={handleSubmit}>
-                {/* 학교이름*/}
-                <Form.Group>
-                  <Form.Label >학교이름</Form.Label>
-                  <InputGroup hasValidation>
-                    <Form.Control
-                      type="text"
-                      name="edu_sc_nm"
-                      value={values.edu_sc_nm}
-                      onChange={handleChange}
-                    />
-                  </InputGroup>
-                  <ErrorMessage name="edu_sc_nm" component="p" />
-                </Form.Group>
-                {/* 전공  */}
-                <Form.Group>
-                  <Form.Label>전공</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="edu_major"
-                    value={values.edu_major}
-                    onChange={handleChange}
+          &&
+          <ThemeProvider theme={theme}>
+            <div className="container">
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <section>
+                  <label><h5>학교</h5></label>
+                  <Controller placeholder="school" as={TextField} name="edu_sc_nm" control={control} fullWidth defaultValue="" ref={register} />
+                </section>
+                <section>
+                  <label><h5>전공</h5></label>
+                  <Controller placeholder="major" as={TextField} name="edu_major" control={control} fullWidth defaultValue="" ref={register} />
+                </section>
+                <section>
+                  <Controller
+                    as={
+                      <RadioGroup row aria-label="position" name="edu_gd_ck" ref={register}>
+                        <FormControlLabel value="1" control={<Radio />} label="재학중" />
+                        <FormControlLabel value="2" control={<Radio />} label="학사졸업" />
+                        <FormControlLabel value="3" control={<Radio />} label="석사졸업" />
+                        <FormControlLabel value="4" control={<Radio />} label="박사졸업" />
+                      </RadioGroup>
+                    }
+                    name="RadioGroup"
+                    control={control}
+                    defaultValue=""
                   />
-                  <ErrorMessage name="edu_major" component="p" />
-                </Form.Group>
-
-                {/* 상태 */}
-                <fieldset>
-                  <Form.Group as={Row}>
-                    <Form.Check
-                      type="radio"
-                      inline
-                      label="재학중"
-                      value="1"
-                      name="formHorizontalRadios"
-                    />
-                    <Form.Check
-                      type="radio"
-                      inline
-                      label="학사졸업"
-                      value="2"
-                      name="formHorizontalRadios"
-                    />
-                    <Form.Check
-                      type="radio"
-                      inline
-                      label="석사졸업"
-                      value="3"
-                      name="formHorizontalRadios"
-                    />
-                    <Form.Check
-                      type="radio"
-                      inline
-                      label="박사졸업"
-                      value="4"
-                      name="formHorizontalRadios"
-                    />
-                    <ErrorMessage name="edu_gd_ck" component="p" />
-                  </Form.Group>
-                </fieldset>
-                <div>
-                  <Button inline type="submit">확인</Button>
-                </div>              
-              </Form>
-            )}
-          </Formik>
-          : null
-      }
+                </section>
+                <input className="eduSubmit" type="submit" />
+              </form>
+            </div>
+          </ThemeProvider>
+        }
       </div> : <div></div>}
     </div>
   );
 }
 
 function EduList(props) {
+  const [status, setStatus] = useState('');
+
+  useEffect(() => {
+    if (props.data.edu_gd_ck == '1') {
+      setStatus('재학중');
+    } else if (props.data.edu_gd_ck == '2') {
+      setStatus('학사졸업');
+    } else if (props.data.edu_gd_ck == '3') {
+      setStatus('석사졸업');
+    } else {
+      setStatus('박사졸업');
+    }
+  }, [])
+
   return (
-    <div key={props.key}>
-      <h4>
-        {props.edu_sc_nm}
-      </h4>
-      <p>졸업</p>
-      <hr />
+    <div key={props.data.key}>
+      <label><h5>학교 및 전공</h5></label>
+      <span className='mgl30'> : {props.data.edu_sc_nm} / {props.data.edu_major}</span>
+      <label><h5>상태</h5></label>
+      <span className='mgl30'> - {status}</span>
+      <hr></hr>
     </div>
   )
 }

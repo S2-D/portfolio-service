@@ -30,12 +30,12 @@ class Edu(Resource):
     def get(self):
         result = []
         args = edu_parser.parse_args()
-        sql = "SELECT edu_sc_nm, edu_major, edu_gd_ck FROM `edu` WHERE `user_id` = %s"
+        sql = "SELECT id, edu_sc_nm, edu_major, edu_gd_ck FROM `edu` WHERE `user_id` = %s"
         cursor.execute(sql, (args['user_id']))
         edus = cursor.fetchall()
         for edu in edus:
             result.append(
-                {'edu_sc_nm': edu[0], 'edu_major': edu[1] , 'edu_gd_ck': edu[2]}
+                {'id': edu[0], 'edu_sc_nm': edu[1], 'edu_major': edu[2] , 'edu_gd_ck': edu[3]}
             )
         return jsonify(status = "success", result = result)
 
