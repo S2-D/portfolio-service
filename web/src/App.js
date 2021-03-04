@@ -20,6 +20,7 @@ import axios from 'axios';
 
 function App() {
   let history = useHistory();
+
   return (
     <div>
       {/* Nav */}
@@ -29,12 +30,13 @@ function App() {
           <Nav.Link as={Link} to="/login">로그인</Nav.Link>
           <Nav.Link as={Link} to="/">네트워크</Nav.Link>
           <Nav.Link onClick={() => {
-            axios.get('http://localhost:5000/auth/logout').then(response => {
-              if (response.data.status === "success") {
-                window.user_id = ''
-                history.push('/login')
-              }
-            })
+            axios.get(`http://${window.location.hostname}:5000/auth/logout`)
+              .then(response => {
+                if (response.data.status === "success") {
+                  localStorage.setItem('access_token', '');
+                  history.push('/login')
+                }
+              })
           }}>로그아웃</Nav.Link>
         </Nav>
       </Navbar>

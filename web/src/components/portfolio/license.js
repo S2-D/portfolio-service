@@ -32,7 +32,7 @@ const schema = yup.object().shape({
 function License() {
   // let history = useHistory();
   const post = (data) => {
-    axios.post(`http://localhost:5000/portfolio/license`, data)
+    axios.post(`http://${window.location.hostname}:5000/portfolio/license`, data)
       .then(response => {
         console.log("response: ", response.data.result)
       }).catch(() => {
