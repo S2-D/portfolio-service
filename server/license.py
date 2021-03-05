@@ -11,7 +11,7 @@ cursor = db.cursor()
 
 # for License api
 license_parser = reqparse.RequestParser()
-license_parser.add_argument('id')
+license_parser.add_argument('user_id')
 license_parser.add_argument('license_nm')
 license_parser.add_argument('license_get_date')
 license_parser.add_argument('license_issuing_org')
@@ -28,6 +28,7 @@ class License(Resource):
     @jwt_required()
     def get(self):
         result = []
+        args = license_parser.parse_args()
         sql = "SELECT license_nm, license_get_date, license_issuing_org FROM `license` WHERE `user_id` = %s"
         cursor.execute(sql, (args['user_id'] ))
         licenses = cursor.fetchall()

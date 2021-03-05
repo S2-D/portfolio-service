@@ -9,19 +9,21 @@ import Avatar from './avatar'
 
 const useStyles = makeStyles({
   root: {
-    minWidth: 275,
+    width: 300,
     height: 300
   },
 
   title: {
-    fontSize: 14,
+    fontSize: 14
   },
+
   pos: {
-    marginBottom: 12,
+    marginBottom: 12
   },
 });
 
-export default function ProfileCard() {
+
+export default function ProfileCard(props) {
   const classes = useStyles();
 
   return (
@@ -30,10 +32,10 @@ export default function ProfileCard() {
         <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" className={classes.large} />
 
         <Typography variant="h5" component="h2">
-          USERNAME
+          {props.username}
         </Typography>
         <Typography className={classes.pos} color="textSecondary">
-          developer
+          {props.email}
         </Typography>
         <Typography variant="body2" component="p">
           한 줄 소개

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
 import { Link, useHistory, Redirect } from 'react-router-dom'
 import { useForm, Controller } from "react-hook-form";
@@ -16,7 +16,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 
 import * as yup from 'yup'
 import axios from 'axios';
-
+import { StateContext } from "../../App";
 import './edu.css';
 
 const EduSchema = yup.object().shape({
@@ -37,22 +37,20 @@ const EduSchema = yup.object().shape({
 });
 
 function Edu() {
-  const { register, control, handleSubmit, errors } = useForm({ resolver: yupResolver(EduSchema) });
-  const onSubmit = (data) => {
-    console.log('data', data);
-    alert(JSON.stringify(data, null, 2));
-    postEdu(data);
-  };
-
-  const [form, setForm] = useState(false);
+  /* useState */
+  const history = useHistory();
   const [edu, setEdu] = useState([]);
+  const [form, setForm] = useState(false);
   const [userid, setUserid] = useState('');
   const [isLogin, setIsLogin] = useState(false);
+  const { control, handleSubmit, errors } = useForm({ resolver: yupResolver(EduSchema) });
 
+  const state = useContext(StateContext);
+  console.log(state)
+
+  /* jwt token setting */
   const access_token = localStorage.getItem('access_token');
   axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-
-  let history = useHistory();
 
   useEffect(() => {
     axios.get(`http://${window.location.hostname}:5000/auth/protected`, {})
@@ -69,6 +67,7 @@ function Edu() {
       })
   }, [])
 
+  /* edu get */
   const getEduList = (data) => {
     axios.get(`http://${window.location.hostname}:5000/edu/?user_id=${data}`, {})
       .then(response => {
@@ -77,6 +76,7 @@ function Edu() {
       })
   }
 
+  /* edu post */
   const postEdu = (data) => {
     data.user_id = userid;
     axios.post(`http://${window.location.hostname}:5000/edu/`, data)
@@ -88,6 +88,14 @@ function Edu() {
       })
   }
 
+  /* 학력 form 제출 */
+  const onSubmit = (data) => {
+    console.log('data', data);
+    alert(JSON.stringify(data, null, 2));
+    postEdu(data);
+  };
+
+  /* react-hook-form theme 생성 */
   const theme = createMuiTheme({
     palette: {
       type: "dark"
@@ -120,26 +128,29 @@ function Edu() {
               <form onSubmit={handleSubmit(onSubmit)}>
                 <section>
                   <label><h5>학교</h5></label>
-                  <Controller placeholder="school" as={TextField} name="edu_sc_nm" control={control} fullWidth defaultValue="" ref={register} />
+                  <Controller placeholder="학교" as={TextField} name="edu_sc_nm" control={control} fullWidth defaultValue="" />
+                  {errors.edu_sc_nm && <p>학교이름을 입력해주세요.</p>}
                 </section>
                 <section>
                   <label><h5>전공</h5></label>
-                  <Controller placeholder="major" as={TextField} name="edu_major" control={control} fullWidth defaultValue="" ref={register} />
+                  <Controller placeholder="전공" as={TextField} name="edu_major" control={control} fullWidth defaultValue="" />
+                  {errors.edu_major && <p>전공을 입력해주세요.</p>}
                 </section>
                 <section>
                   <Controller
                     as={
-                      <RadioGroup row aria-label="position" name="edu_gd_ck" ref={register}>
+                      <RadioGroup row aria-label="position" name="edu_gd_ck">
                         <FormControlLabel value="1" control={<Radio />} label="재학중" />
                         <FormControlLabel value="2" control={<Radio />} label="학사졸업" />
                         <FormControlLabel value="3" control={<Radio />} label="석사졸업" />
                         <FormControlLabel value="4" control={<Radio />} label="박사졸업" />
                       </RadioGroup>
                     }
-                    name="RadioGroup"
+                    name="edu_gd_ck"
                     control={control}
                     defaultValue=""
                   />
+                  {errors.edu_gd_ck && <p>상태를 선택해주세요.</p>}
                 </section>
                 <input className="eduSubmit" type="submit" />
               </form>

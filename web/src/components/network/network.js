@@ -1,9 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from 'react-bootstrap';
 import { Link, useHistory } from 'react-router-dom'
-
+import ProfileCard from '../profile/profile';
 import axios from 'axios';
+
+import { makeStyles } from '@material-ui/core/styles';
+import Grid from '@material-ui/core/Grid';
+
+
+const useStyles = makeStyles((theme) => ({
+    root: {
+      flexGrow: 1,
+    },
+    paper: {
+      padding: theme.spacing(2),
+      textAlign: 'center',
+      color: theme.palette.text.secondary,
+    },
+  }));
+
 function Network() {
+    const classes = useStyles();
+
     const [input, setInput] = useState('');
     const [user,setUser] = useState([]);
     const [isLogin, setIsLogin] = useState(false);
@@ -28,6 +46,7 @@ function Network() {
           })
       },[])
       
+      
     const search = (data) => {
     axios.get(`http://${window.location.hostname}:5000/network/?username=${data}`)
         .then(response => {
@@ -40,40 +59,44 @@ function Network() {
 
     return (
         <div>
-            {isLogin ? <div>
+            {isLogin && <div>
                 <div className="publish">
                     <input onChange={(e) => { setInput(e.target.value) }} placeholder="이름으로 검색" />
                     <button onClick={() => {
                         search(input)
                     }}>검색</button>
+                    <Grid container  justify="center" spacing={4}>
+
                     {
                         // user.length == 0
                         // ?<div>없음!!</div>
                         // :
                         user.map((data)=>(
-                            <NetworkCard key={data.id} username={data.username} email={data.email}/>
+                            <Grid item spacing={4}>
+                            <ProfileCard key={data.id} username={data.username} email={data.email}/>
+                            </Grid>
                         ))                
                     }
-                
+                    </Grid>
                 </div>
-            </div> : <div></div>}
+            </div>}
             
         </div>
     );
 }
 
-function NetworkCard(props) {
-    return (
-    <Card style={{ width: '18rem' }}>
-    <Card.Body>
-        <Card.Title>{props.username}</Card.Title>
-        <Card.Subtitle className="mb-2 text-muted">{props.email}</Card.Subtitle>
-        <Card.Text>
-        한 줄 소개
-        </Card.Text>
-        <Card.Link href="#">프로필 보기</Card.Link>
-    </Card.Body>
-</Card>)
-}
+// function NetworkCard(props) {
+//     return (
+//     <Card style={{ width: '18rem' }}>
+//     <Card.Body>
+//         <Card.Title>{props.username}</Card.Title>
+//         <Card.Subtitle className="mb-2 text-muted">{props.email}</Card.Subtitle>
+//         <Card.Text>
+//         한 줄 소개
+//         </Card.Text>
+//         <Card.Link href="#">프로필 보기</Card.Link>
+//     </Card.Body>
+// </Card>)
+// }
 
 export default Network;

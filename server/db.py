@@ -46,8 +46,8 @@ class Project(db.Model):
 class License(db.Model):
       id = db.Column(db.Integer, primary_key=True)
       license_nm = db.Column(db.Text, nullable=False)
-      license_get_date = db.Column(db.Text, nullable=False)
-      license_issuing_org = db.Column(db.Date, nullable=True)
+      license_get_date = db.Column(db.Date, nullable=False)
+      license_issuing_org = db.Column(db.Text, nullable=True)
       user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
 
 
@@ -83,13 +83,13 @@ def init_db():
 
       db.session.commit()
       sample_edu1 = Edu(
-            edu_sc_nm="edu_sc_nm1", edu_major="edu_major1", edu_gd_ck=1, user_id=1
+            edu_sc_nm="서울대학교", edu_major="경제학과", edu_gd_ck=1, user_id=1
       )
       sample_edu2 = Edu(
-            edu_sc_nm="edu_sc_nm2", edu_major="edu_major2", edu_gd_ck=3, user_id=1
+            edu_sc_nm="고려대학교", edu_major="물리학과", edu_gd_ck=3, user_id=1
       )
       sample_edu3 = Edu(
-            edu_sc_nm="edu_sc_nm3", edu_major="edu_major3", edu_gd_ck=2, user_id=2
+            edu_sc_nm="연세대학교", edu_major="수학과", edu_gd_ck=2, user_id=2
       )
       db.session.add(sample_edu1)
       db.session.add(sample_edu2)
@@ -109,12 +109,12 @@ def init_db():
       db.session.add(sample_awards3)
       db.session.commit()
       sample_project = Project(
-            project_nm="project_nm1", project_desc="project_desc1", user_id=1
+            project_nm="project_nm1", project_desc="project_desc1", project_st=db.func.now(), project_et=db.func.now(), user_id=1
       )
       db.session.add(sample_project)
       db.session.commit()
       sample_license = License(
-            license_nm="license_nm1", license_get_date="license_get_date1", user_id=1
+            license_nm="license_nm1", license_issuing_org="license_issuing_org1", license_get_date=db.func.now(), user_id=1
       )
       db.session.add(sample_license)
       db.session.commit()
