@@ -6,6 +6,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Avatar from './avatar'
+import { useHistory, Route, Link } from 'react-router-dom';
 
 const useStyles = makeStyles({
   root: {
@@ -25,26 +26,35 @@ const useStyles = makeStyles({
 
 export default function ProfileCard(props) {
   const classes = useStyles();
-
+  const history = useHistory();
+  const current_user_id = props.loginUserId;
+  const selectedId = props.selectedId
+  
   return (
     <Card className={classes.root} variant="outlined">
       <CardContent>
         <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" className={classes.large} />
-
+        LOGIN USER {props.loginUserId}
+        selectedID {props.selectedId}
         <Typography variant="h5" component="h2">
           {props.username}
         </Typography>
         <Typography className={classes.pos} color="textSecondary">
           {props.email}
         </Typography>
-        <Typography variant="body2" component="p">
+        {/* <Typography variant="body2" component="p">
           한 줄 소개
           <br />
           {'"a benevolent smile"'}
-        </Typography>
+        </Typography> */}
       </CardContent>
       <CardActions>
-      <Button color="primary">포트폴리오 보기</Button>
+      {/* <Button onClick={()=>{ history.push({
+        pathname:"/user",
+        search: '?query=abc',
+        state : { selectedId :selectedId }
+      }) }} color="primary">포트폴리오 보기</Button> */}
+      <Button onClick={()=>{ history.push(`/user/${selectedId}`) }} color="primary">포트폴리오 보기</Button>
       </CardActions>
     </Card>
   );

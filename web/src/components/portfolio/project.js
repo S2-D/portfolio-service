@@ -63,7 +63,7 @@ function Project() {
   const access_token = localStorage.getItem('access_token');
   axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
-  let history = useHistory();
+  const history = useHistory();
 
   useEffect(() => {
     axios.get(`http://${window.location.hostname}:5000/auth/protected`, {})
@@ -184,7 +184,7 @@ function ProjectList(props) {
       <label><h5>프로젝트 상세</h5></label>
       <span className='mgl30'>{props.data.project_desc}</span>
       <label><h5>프로젝트 기간</h5></label>
-      <span className='mgl30'> : <Moment format="YYYY-MM-DD" date={props.data.project_st}/> / <Moment format="YYYY-MM-DD" date={props.data.project_et}/></span>
+      <span className='mgl30'> : <Moment format="YYYY.MM.DD" date={props.data.project_st}/> - <Moment format="YYYY.MM.DD" date={props.data.project_et}/></span>
       
       <hr />
     </div>

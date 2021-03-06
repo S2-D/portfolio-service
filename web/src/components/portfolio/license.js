@@ -59,7 +59,7 @@ function License() {
   const access_token = localStorage.getItem('access_token');
   axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
-  let history = useHistory();
+  const history = useHistory();
 
   useEffect(() => {
     axios.get(`http://${window.location.hostname}:5000/auth/protected`, {})

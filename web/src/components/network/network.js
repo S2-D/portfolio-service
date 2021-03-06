@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Card } from 'react-bootstrap';
+import React, { useEffect, useState, useParams } from 'react';
+
 import { Link, useHistory } from 'react-router-dom'
 import ProfileCard from '../profile/profile';
 import axios from 'axios';
@@ -7,17 +7,22 @@ import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 
+import { useForm } from "react-hook-form";
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from "yup";
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
       flexGrow: 1,
-    },
-    paper: {
-      padding: theme.spacing(2),
-      textAlign: 'center',
-      color: theme.palette.text.secondary,
-    },
+    }
   }));
+
+const schema = yup.object().shape({
+    searchInput: yup
+    .string()
+    ,
+  });
 
 function Network() {
     const classes = useStyles();
@@ -26,19 +31,32 @@ function Network() {
     const [user,setUser] = useState([]);
     const [isLogin, setIsLogin] = useState(false);
 
+    //let { id } = useParams();
+
+    const { register, handleSubmit, errors } = useForm({
+        resolver: yupResolver(schema)
+      });
+    const onSubmit = (data) => {
+        console.log(data.searchInput.length); 
+        if(data.searchInput.length < 2){
+            alert("검색어는 최소 2글자 이상 입력해야 합니다.")
+            return
+        }else {
+            search(data.searchInput);
+        }
+    };
+
     const access_token = localStorage.getItem('access_token');
     axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
-    let history = useHistory();
+    const history = useHistory();
 
     useEffect(()=> {
         //로그인 여부 조회
         axios.get(`http://${window.location.hostname}:5000/auth/protected`, {})
           .then(response => {
-    
             search();
             setIsLogin(true);
-    
           }).catch((error) => {
             alert('로그인 후 이용해주세요.');
             history.push('/login');
@@ -51,7 +69,8 @@ function Network() {
     axios.get(`http://${window.location.hostname}:5000/network/?username=${data}`)
         .then(response => {
             console.log("response: ", response.data.result)
-            setUser(response.data.result);
+             setUser(response.data.result);
+            //console.log("get_user",user)
         }).catch(() => {
             console.log("fail")
         })
@@ -61,10 +80,12 @@ function Network() {
         <div>
             {isLogin && <div>
                 <div className="publish">
-                    <input onChange={(e) => { setInput(e.target.value) }} placeholder="이름으로 검색" />
-                    <button onClick={() => {
-                        search(input)
-                    }}>검색</button>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <input type="text" name="searchInput" ref={register} onChange={(e) => { setInput(e.target.value)}}/>
+                    <p>{errors.searchInput?.message}</p>
+                    <input type="submit" />
+                </form>
+
                     <Grid container  justify="center" spacing={4}>
 
                     {
@@ -73,7 +94,7 @@ function Network() {
                         // :
                         user.map((data)=>(
                             <Grid item spacing={4}>
-                            <ProfileCard key={data.id} username={data.username} email={data.email}/>
+                            <ProfileCard selectedId={data.id} username={data.username} email={data.email}/>
                             </Grid>
                         ))                
                     }
@@ -85,18 +106,5 @@ function Network() {
     );
 }
 
-// function NetworkCard(props) {
-//     return (
-//     <Card style={{ width: '18rem' }}>
-//     <Card.Body>
-//         <Card.Title>{props.username}</Card.Title>
-//         <Card.Subtitle className="mb-2 text-muted">{props.email}</Card.Subtitle>
-//         <Card.Text>
-//         한 줄 소개
-//         </Card.Text>
-//         <Card.Link href="#">프로필 보기</Card.Link>
-//     </Card.Body>
-// </Card>)
-// }
 
 export default Network;

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useParams, createContext } from "react";
+import React, { useContext, useState, useEffect, createContext } from "react";
 import { Link, Route, Switch, useHistory, useParams } from 'react-router-dom'
 
 import axios from 'axios';
@@ -15,10 +15,10 @@ import { StateContext } from "../../App";
 import { Container, Row, Spinner } from "react-bootstrap";
 
 
-function User() {
+function User({loginUserId}) {
   const history = useHistory();
   const [isLoading, setIsLoading] = useState(true);
-  
+
   let { id } = useParams();
 
   useEffect(() => {
@@ -34,11 +34,13 @@ function User() {
         history.push('/login');
         return;
       })
+
   }, [])
 
 
   return (
     <Container>
+      selected USERID : {id[0]}
       {isLoading ? (
         <Row className="justify-content-md-center p-5">
           <Spinner animation="border" role="status">
@@ -46,20 +48,15 @@ function User() {
           </Spinner>
         </Row>
       ) : (
-          <StateContext.Consumer>
-            id는{id}
-            {loginUserId => (
               <Grid container spacing={3}>
                 <Grid item xs={8}>
-                  <OutlinedCard />
-                  <Edu loginUserId={loginUserId} />
-                  {/* <Awards userid={userid} isLogin={isLogin}/>
-                <Project userid={userid} isLogin={isLogin}/>
-                <License userid={userid} isLogin={isLogin} license={license}/> */}
+                  <OutlinedCard loginUserId={loginUserId}  />
+                  <Edu loginUserId={id[0]} />
+                  {/* <Awards loginUserId={id[0]}/>
+                <Project loginUserId={id[0]}/>
+                <License loginUserId={id[0]}/> */}
                 </Grid>
               </Grid>
-            )}
-          </StateContext.Consumer>
         )}
     </Container>
   );

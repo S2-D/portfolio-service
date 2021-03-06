@@ -1,130 +1,101 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
+/* css */
 import './App.css';
-import Signup from './components/auth/signup';
-// import Login from './components/auth/login';
-// import Edu from './components/portfolio/edu';
-// import Awards from './components/portfolio/awards';
-// import Project from './components/portfolio/project';
-// import License from './components/portfolio/license';
-import Network from './components/network/network'
-// import OutlinedCard from './components/profile/profile'
-import TestUser from './components/portfolio/testuser';
-
-import HookFormLogin from './HookFormLogin'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 
-import { makeStyles } from '@material-ui/core/styles';
+/* design */
+import { Link, Route, Switch, useHistory } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 
-
-
-import { Link, Route, Switch, useHistory } from 'react-router-dom'
+/* component */
+import Signup from './components/auth/signup';
+// import User from './components/portfolio/user';
+import User from './components/portfolio/userCopy';
+import Network from './components/network/network';
+import Header from './components/Header/header';
+import HookFormLogin from './components/auth/HookFormLogin';
 
 import React, { useEffect, useState, createContext } from 'react';
 import { Row, Container, Col, Form, Nav, Navbar, Button } from 'react-bootstrap';
 import axios from 'axios';
 
+
+/* context */
 export const StateContext = createContext(null);
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
-  paper: {
-    padding: theme.spacing(2),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-  },
-}));
 
 function App() {
-  let history = useHistory();
-  const [isLoading, setIsLoading] = useState(false);
-  const classes = useStyles();
+  const history = useHistory();
+  const [userid, setUserid] = useState('');
+
+  useEffect(() => {
+    console.log('App useEffect()');
+    console.log('   1. app 실행 (app.js)');
+
+    /* access_token 조회 */
+    const access_token = localStorage.getItem('access_token');
+    axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+
+    /* access_token 존재하는 경우에는 */
+    if (access_token != '' && access_token != null) {
+      console.log('     access_token이 존재하는 경우')
+
+      /* access_token이 유효한지 검증 >> 로그인 상태 유지 */
+      axios.get(`http://${window.location.hostname}:5000/auth/protected`, {})
+        .then(response => {
+          console.log('         ㄴ /auth/protected 실행결과 > 로그인 ID: ', response.data.logged_in_as)
+          setUserid(response.data.logged_in_as);
+
+        }).catch((error) => {
+          alert('로그인 후 이용해주세요.');
+          history.push('/login');
+          return;
+        })
+    } else {
+      console.log('     access_token이 존재하지 않음 => 현재 로그아웃 상태')
+    }
+  }, [userid]);
+
+  const setLoginUserId = (loginUserId) => {
+    setUserid(loginUserId);
+  }
 
   return (
-    <StateContext.Provider value={isLoading}>
+    <StateContext.Provider value={userid}>
       <div>
-        {/* Nav */}
-        <Navbar className="" bg="dark" variant="dark">
-          <Navbar.Brand href="/">Portfolio </Navbar.Brand>
-          <Nav className="ml-auto">
-            <Nav.Link as={Link} to="/login">로그인</Nav.Link>
-            <Nav.Link as={Link} to="/network">네트워크</Nav.Link>
-            <Nav.Link onClick={() => {
-              if (window.confirm('로그아웃 하시겠습니까?')) {
-                axios.get(`http://${window.location.hostname}:5000/auth/logout`)
-                  .then(response => {
-                    if (response.data.status === "success") {
-                      localStorage.setItem('access_token', '');
-                      history.push('/login')
-                    }
-                  })
-              }
-            }}>로그아웃</Nav.Link>
-          </Nav>
-        </Navbar>
+
+       <Header />
 
         <Switch>
           <Route exact path="/">
-            <TestUser/>
-            {/* <Grid container spacing={3}>
-              <Grid item xs={4}>
-              <OutlinedCard />
-              </Grid>
-              <Grid item xs={8}>
-              <Edu />
-              <Awards />
-              <Project />
-              <License />
-              </Grid>
-            </Grid> */}
-            {/* <Container>
-              <Col md={8} className="pf-div">
-                <Edu />
-              </Col>
-              <Col md={8} className="pf-div">
-                <Awards />
-              </Col>
-              <Col md={8} className="pf-div">
-                <Project />
-              </Col>
-              <Col md={8} className="pf-div">
-                <License />
-              </Col>
-            </Container> */}
+            <Container>
+              <User />
+            </Container>
+
           </Route>
 
           {/* 로그인 */}
           <Route path="/login">
             <Container>
-              {/* <Row>
-                <Col />
-                <Col xs={6} className="login-form"> */}
-                  {/* <Login /> */}
-                  <HookFormLogin />
-                {/* </Col>
-                <Col />
-              </Row> */}
+              <HookFormLogin setLoginUserId={setLoginUserId} />
             </Container>
           </Route>
 
-          {/* 회원가입  */}
+          {/* 회원가입 */}
           <Route path="/signup">
-
             <Container>
-              {/* <Row>
-                <Col />
-                <Col className="login-form" xs={6}> */}
-                  <Signup />
-                {/* </Col>
-                <Col />
-              </Row> */}
+              <Signup />
             </Container>
           </Route>
 
+          {/* 네트워크 */}
           <Route path="/network">
-            <Network></Network>
+            <Container>
+              <Network />
+            </Container>
+          </Route>
+
+          <Route path="/user/:id" component={User}>
           </Route>
 
         </Switch>

@@ -24,10 +24,6 @@ const AwardsSchema = yup.object().shape({
   awards_desc: yup
     .string()
     .required(),
-  user_id: yup
-    .string()
-  // .number()
-  // .integer()
 });
 
 function Awards() {
@@ -46,7 +42,7 @@ function Awards() {
   // const access_token = localStorage.getItem('access_token');
   // axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
-  let history = useHistory();
+  const history = useHistory();
 
 
   useEffect(() =>

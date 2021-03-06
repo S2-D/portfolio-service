@@ -12,11 +12,10 @@ import {
 } from "@material-ui/core";
 import { yupResolver } from '@hookform/resolvers/yup';
 
-
-
 import * as yup from 'yup'
 import axios from 'axios';
 import { StateContext } from "../../App";
+
 import './edu.css';
 
 const EduSchema = yup.object().shape({
@@ -36,7 +35,7 @@ const EduSchema = yup.object().shape({
   //   // .integer()
 });
 
-function Edu() {
+function Edu({loginUserId}) {
   /* useState */
   const history = useHistory();
   const [edu, setEdu] = useState([]);
@@ -44,34 +43,23 @@ function Edu() {
   const [userid, setUserid] = useState('');
   const [isLogin, setIsLogin] = useState(false);
   const { control, handleSubmit, errors } = useForm({ resolver: yupResolver(EduSchema) });
-
-  const state = useContext(StateContext);
-  console.log(state)
+  console.log('edu.js :',loginUserId)
 
   /* jwt token setting */
   const access_token = localStorage.getItem('access_token');
   axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
   useEffect(() => {
-    axios.get(`http://${window.location.hostname}:5000/auth/protected`, {})
-      .then(response => {
 
-        getEduList(response.data.logged_in_as);
-        setUserid(response.data.logged_in_as);
-        setIsLogin(true);
+    getEduList(loginUserId);
 
-      }).catch((error) => {
-        alert('로그인 후 이용해주세요.');
-        history.push('/login');
-        return;
-      })
   }, [])
 
   /* edu get */
   const getEduList = (data) => {
     axios.get(`http://${window.location.hostname}:5000/edu/?user_id=${data}`, {})
       .then(response => {
-        console.log(response);
+        console.log(response)
         setEdu(response.data.result);
       })
   }
@@ -178,13 +166,19 @@ function EduList(props) {
   }, [])
 
   return (
-    <div key={props.data.key}>
+    <StateContext.Consumer>
+      {
+        (userid) => (
+<div key={props.data.key}>
       <label><h5>학교 및 전공</h5></label>
-      <span className='mgl30'> : {props.data.edu_sc_nm} / {props.data.edu_major}</span>
+      <span className='mgl30'> : {userid} / {props.data.edu_major}</span>
       <label><h5>상태</h5></label>
       <span className='mgl30'> - {status}</span>
       <hr></hr>
     </div>
+        )
+      }
+    </StateContext.Consumer>
   )
 }
 
