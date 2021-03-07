@@ -44,7 +44,7 @@ axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
 useEffect(() => {
   if(loginUserId != ''){
-    console.log('loginUserId',loginUserId);
+    //console.log('loginUserId',loginUserId);
     getUserInfo(loginUserId);
   }
 }, [loginUserId])
@@ -53,7 +53,7 @@ useEffect(() => {
   const getUserInfo = (data) => {
     axios.get(`http://${window.location.hostname}:5000/profile/?id=${data}`, {})
       .then(response => {
-        console.log(response) 
+        //console.log(response) 
         setUserInfo(response.data.result);
         
       })
@@ -66,20 +66,19 @@ useEffect(() => {
     <Card className={classes.root} variant="outlined">
       <CardContent>
         <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" className={classes.large} />
-        <Typography variant="h5" component="h2">
           {
             userInfo.map((data) => (
-              <div>{data.username}</div>
+              <div key={data.id}>
+                <Typography variant="h5" component="h2">
+                  {data.username}
+                </Typography>
+                <Typography className={classes.pos}>
+                  {data.email}
+                </Typography>
+              </div>
             ))
           }
-        </Typography>
-        <Typography className={classes.pos}>
-        {
-            userInfo.map((data) => (
-              <div>{data.email}</div>
-            ))
-          }
-        </Typography>
+        
       </CardContent>
       <CardActions>
       </CardActions>

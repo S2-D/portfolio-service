@@ -20,9 +20,18 @@ class Network(Resource):
     def get(self):
         result=[]
         args = network_parser.parse_args()
-        username = '%' + args['username'] + '%'
-        sql = "SELECT * FROM `user` WHERE username LIKE %s"
-        cursor.execute(sql, (username ,))
+
+        username = ''
+
+        if args['username'] == '':
+            sql = "SELECT * FROM `user`"
+            cursor.execute(sql)
+
+        else:
+            username = '%' + args['username'] + '%'
+            sql = "SELECT * FROM `user` WHERE username LIKE %s"
+            cursor.execute(sql, (username ,))
+        
         networks = cursor.fetchall()
         
         for network in networks:

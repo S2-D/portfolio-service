@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
-import { Link, useHistory } from 'react-router-dom'
+import { Button } from 'react-bootstrap';
 import { useForm, Controller } from "react-hook-form";
 import {
   TextField,
@@ -11,9 +10,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 
 import * as yup from 'yup'
 import axios from 'axios';
-import { StateContext } from "../../App";
-
-
 import './edu.css';
 
 const AwardsSchema = yup.object().shape({
@@ -45,7 +41,7 @@ function Awards({ loginUserId, isEditable }) {
 
   useEffect(() => {
     if (loginUserId != '') {
-      console.log('loginUserId', loginUserId);
+      //console.log('loginUserId', loginUserId);
       getAwardsList(loginUserId);
     }
   }, [loginUserId])
@@ -55,7 +51,7 @@ function Awards({ loginUserId, isEditable }) {
     axios.get(`http://${window.location.hostname}:5000/awards/?user_id=${data}`, {})
       .then(response => {
         setAwards(response.data.result);
-        console.log("awards", awards);
+        //console.log("awards", awards);
       })
   }
 
@@ -64,8 +60,9 @@ function Awards({ loginUserId, isEditable }) {
     data.user_id = loginUserId;
     axios.post(`http://${window.location.hostname}:5000/awards/`, data)
       .then(response => {
-        console.log("response: ", response.data.result);
+        //console.log("response: ", response.data.result);
         getAwardsList(loginUserId);
+        setForm(false);
       }).catch(() => {
         console.log("fail")
       })
@@ -73,7 +70,7 @@ function Awards({ loginUserId, isEditable }) {
 
   /* 수상내역 form 제출 */
   const onSubmit = (data) => {
-    console.log('data', data);
+    //console.log('data', data);
     //alert(JSON.stringify(data, null, 2));
     postAwards(data);
   };
@@ -82,21 +79,24 @@ function Awards({ loginUserId, isEditable }) {
   return (
     <div className='borderDiv'>
       <div>
-        <h3>수상내역</h3>
+        <label><h3 className='topTitle'>수상내역</h3></label>
         <br />
         {
           awards.map((data) => (
             <AwardsList key={data.id} data={data} loginUserId={loginUserId} isEditable={isEditable} />
           ))
         }
-        <Button onClick={() => { setForm(!form) }}>
-          {
-            form
-              ? '닫기'
-              : '작성하기'
-          }
-        </Button>
-
+        {
+          isEditable && (
+            <Button className='register' onClick={() => { setForm(!form) }}>
+              {
+                form
+                  ? '닫기'
+                  : '작성하기'
+              }
+            </Button>
+          )
+        }
         {
           form
           &&
@@ -113,7 +113,7 @@ function Awards({ loginUserId, isEditable }) {
                   <Controller placeholder="" as={TextField} name="awards_desc" control={control} fullWidth defaultValue="" />
                   {errors.awards_desc && <p>전공을 입력해주세요.</p>}
                 </section>
-                <input className="awardsSubmit" type="submit" />
+                <input className="userSubmit" type="submit" />
               </form>
             </div>
           </ThemeProvider>
@@ -139,7 +139,7 @@ function AwardsList(props) {
 
   const onClickDelete = (e) => {
 
-    console.log(e.target.dataset.id)
+    //console.log(e.target.dataset.id)
     const id = e.target.dataset.id;
 
     if (window.confirm('삭제 하시겠습니까?')) {
@@ -178,43 +178,43 @@ function AwardsList(props) {
   }
 
   return (
-        <ThemeProvider theme={theme}>
-          <div key={props.data.key}>
-            <form onSubmit={handleSubmit(onSubmit)}>
-            <section>
-              <label>
-                <h5>수상내역</h5>
-                {
-                  props.isEditable && (
-                    <span className='floatR'>
-                      {
-                        isClicked ? (
-                          <a href='#' onClick={onClickModify}>닫기</a>
-                        ) : (
+    <ThemeProvider theme={theme}>
+      <div key={props.data.key} className="container">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <section>
+            <label>
+              <h5>수상내역</h5>
+              {
+                props.isEditable && (
+                  <span className='floatR'>
+                    {
+                      isClicked ? (
+                        <a href='#' onClick={onClickModify}>닫기</a>
+                      ) : (
                           <a href='#' onClick={onClickModify}>수정</a>
                         )
-                      }
+                    }
                           &nbsp; &nbsp; <a href='#' data-id={props.data.id} onClick={onClickDelete}>삭제</a>
-                    </span>
-                  )
-                }
-              </label>
-              <Controller disabled={isClicked ? false : true} placeholder="수상내역" as={TextField} name="awards_nm" control={control} fullWidth defaultValue={props.data.awards_nm}/>
-              {errors.awards_nm && <p>수상 내역을 입력해주세요.</p>}
-              </section>
-              <section>
-                <label><h5>상세</h5></label>
-                <Controller  disabled={isClicked ? false : true} placeholder="상세" as={TextField} name="awards_desc" control={control} fullWidth defaultValue={props.data.awards_desc}/>
-                {errors.awards_desc && <p>상세 내용을 입력해주세요.</p>}
-              </section>
-              <Controller type="hidden" as={TextField} name="id" control={control} defaultValue={props.data.id} />
-                {
-                  isClicked && (<input className="awardsSubmit" type="submit" />)
-                }            
-                </form>
-          </div>
-        </ThemeProvider>
-      )
-      }
+                  </span>
+                )
+              }
+            </label>
+            <Controller disabled={isClicked ? false : true} placeholder="수상내역" as={TextField} name="awards_nm" control={control} fullWidth defaultValue={props.data.awards_nm} />
+            {errors.awards_nm && <p>수상 내역을 입력해주세요.</p>}
+          </section>
+          <section>
+            <label><h5>상세</h5></label>
+            <Controller disabled={isClicked ? false : true} placeholder="상세" as={TextField} name="awards_desc" control={control} fullWidth defaultValue={props.data.awards_desc} />
+            {errors.awards_desc && <p>상세 내용을 입력해주세요.</p>}
+          </section>
+          <Controller type="hidden" as={TextField} name="id" control={control} defaultValue={props.data.id} />
+          {
+            isClicked && (<input className="userSubmit" type="submit" />)
+          }
+        </form>
+      </div>
+    </ThemeProvider>
+  )
+}
 
 export default Awards;

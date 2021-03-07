@@ -1,5 +1,5 @@
-import React, { useContext, useState, useEffect, createContext } from "react";
-import { Link, Route, Switch, useHistory, useParams } from 'react-router-dom'
+import React, { useState, useEffect } from "react";
+import { useHistory, useParams } from 'react-router-dom'
 
 import axios from 'axios';
 
@@ -9,8 +9,6 @@ import Project from './project';
 import License from './license';
 import Profile from '../profile/profile';
 
-import { makeStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
 import { StateContext } from "../../App";
 import { Container, Row, Spinner } from "react-bootstrap";
 
@@ -21,7 +19,7 @@ function User() {
   const [selectedId, setSelectedId] = useState();
 
   let { id } = useParams();
-  
+
 
   useEffect(() => {
     const access_token = localStorage.getItem('access_token');
@@ -51,19 +49,19 @@ function User() {
           </Spinner>
         </Row>
       ) : (
-            <StateContext.Consumer>
-              {
-                loginUserId => (
-                  <div>
-                    <Profile loginUserId={id[0]} isEditable={selectedId == loginUserId}/>
-                    <Edu loginUserId={id[0]} isEditable={selectedId == loginUserId} />
-                    <Awards loginUserId={id[0]} isEditable={selectedId == loginUserId} />
-                    <Project loginUserId={id[0]} isEditable={selectedId == loginUserId} />
-                    <License loginUserId={id[0]} isEditable={selectedId == loginUserId} />
-                  </div>
-                )
-              }
-              </StateContext.Consumer>
+          <StateContext.Consumer>
+            {
+              loginUserId => (
+                <div>
+                  <Profile loginUserId={id[0]} isEditable={selectedId == loginUserId} />
+                  <Edu loginUserId={id[0]} isEditable={selectedId == loginUserId} />
+                  <Awards loginUserId={id[0]} isEditable={selectedId == loginUserId} />
+                  <Project loginUserId={id[0]} isEditable={selectedId == loginUserId} />
+                  <License loginUserId={id[0]} isEditable={selectedId == loginUserId} />
+                </div>
+              )
+            }
+          </StateContext.Consumer>
         )}
     </Container>
   );

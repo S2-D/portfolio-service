@@ -13,9 +13,9 @@ const schema = yup.object().shape({
       .required("아이디를 입력해주세요"),
     password: yup
       .string()
-      // .min(8, '8자리 이상으로 만들어주세요')
-      // .max(16)
-      // .matches("^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$","비밀번호는 영문/ 숫자/ 특수문자를 모두 포함해야 합니다.")
+      .min(8, '8자리 이상으로 만들어주세요')
+      .max(16)
+      .matches("^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$","비밀번호는 영문/ 숫자/ 특수문자를 모두 포함해야 합니다.")
       .required("비밀번호를 입력해주세요")
       ,
     confirm: yup
@@ -95,64 +95,6 @@ function Signup() {
             회원가입
           </Button>
         </Form>
-        // <Form noValidate onSubmit={handleSubmit}>
-        //   <Form.Row>
-        //       {/* 아이디 */}
-        //     <Form.Group as={Col} md="4" controlId="validationFormik01">
-        //       <Form.Label>아이디</Form.Label>
-        //       <InputGroup hasValidation>
-        //         <InputGroup.Prepend>
-        //             <InputGroup.Text id="inputGroupPrepend">@</InputGroup.Text>
-        //         </InputGroup.Prepend>
-        //       <Form.Control
-        //         type="text"
-        //         name="email"
-        //         value={values.email}
-        //         onChange={handleChange}
-        //         />
-        //     </InputGroup>
-        //     <ErrorMessage name="email" component="p" />
-        //     </Form.Group>
-
-        //     {/* 비밀번호  */}
-        //     <Form.Group as={Col} md="4" controlId="validationFormik02">
-        //       <Form.Label>비밀번호</Form.Label>
-        //       <Form.Control
-        //         type="password"
-        //         name="password"
-        //         value={values.pasword}
-        //         onChange={handleChange}
-        //         />
-        //       <ErrorMessage name="password" component="p" />
-        //     </Form.Group>
-        //     <Form.Group as={Col} md="4" controlId="validationFormik03">
-        //       <Form.Label>비밀번호 확인</Form.Label>
-        //       <Form.Control
-        //         type="password"
-        //         name="confirm"
-        //         value={values.confirm}
-        //         onChange={handleChange}
-        //         />
-        //         <ErrorMessage name="confirm" component="p" />
-        //     </Form.Group>
-
-        //     {/* 이름 */}
-        //     <Form.Group as={Col} md="4" controlId="validationFormikUsername">
-        //       <Form.Label>이름</Form.Label>
-             
-        //         <Form.Control
-        //           type="text"
-        //           aria-describedby="inputGroupPrepend"
-        //           name="username"
-        //           value={values.username}
-        //           onChange={handleChange}
-        //         />
-        //         <ErrorMessage name="username" component="p" />
-
-        //     </Form.Group>
-        //   </Form.Row>
-        //   <Button type="submit">회원가입</Button>
-        // </Form>
       )}
     </Formik>
   );

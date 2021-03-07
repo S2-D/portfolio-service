@@ -53,6 +53,7 @@ function App() {
     } else {
       console.log('     access_token이 존재하지 않음 => 현재 로그아웃 상태')
     }
+    console.log(userid);
   }, [userid]);
 
   const setLoginUserId = (loginUserId) => {
@@ -63,12 +64,12 @@ function App() {
     <StateContext.Provider value={userid}>
       <div>
 
-       <Header />
+       <Header userid={userid} setLoginUserId={setLoginUserId}/>
 
         <Switch>
           <Route exact path="/">
             <Container>
-              {/* <User /> */}
+              <HookFormLogin setLoginUserId={setLoginUserId} />
             </Container>
 
           </Route>

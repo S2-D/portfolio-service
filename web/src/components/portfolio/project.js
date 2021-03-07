@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
-import { Link, useHistory, Redirect } from 'react-router-dom'
+import { Button } from 'react-bootstrap';
+import { useHistory } from 'react-router-dom'
 import { useForm, Controller } from "react-hook-form";
 import axios from 'axios';
 
@@ -13,7 +13,6 @@ import {
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
-import Moment from 'react-moment';
 
 const ProjectSchema = yup.object().shape({
   project_nm: yup
@@ -24,11 +23,11 @@ const ProjectSchema = yup.object().shape({
     .required(),
   project_st: yup
     .date()
-  // .required()
+    .required()
   ,
   project_et: yup
     .date()
-  // .required()
+    .required()
 });
 
 /* react-hook-form theme 생성 */
@@ -73,7 +72,7 @@ function Project({ loginUserId, isEditable }) {
 
   useEffect(() => {
     if (loginUserId != '') {
-      console.log('loginUserId', loginUserId);
+      //console.log('loginUserId', loginUserId);
       getProjectList(loginUserId);
     }
   }, [loginUserId])
@@ -82,7 +81,7 @@ function Project({ loginUserId, isEditable }) {
     data.project_st = startDate;
     data.project_et = endDate;
 
-    console.log('data', data);
+    //console.log('data', data);
     //alert(JSON.stringify(data, null, 2));
     postProject(data);
   };
@@ -107,38 +106,44 @@ function Project({ loginUserId, isEditable }) {
     data.user_id = loginUserId;
     axios.post(`http://${window.location.hostname}:5000/project/`, data)
       .then(response => {
-        console.log("response: ", response.data.result);
+        //console.log("response: ", response.data.result);
         getProjectList(loginUserId);
+        setForm(false);
       }).catch(() => {
         console.log("fail")
       })
   }
 
   const handleChangeStartDate = (e) => {
-    console.log(e.target.value)
+    //console.log(e.target.value)
     setStartDate(e.target.value);
   };
   const handleChangeEndDate = (e) => {
-    console.log(e.target.value)
+    //console.log(e.target.value)
     setEndDate(e.target.value);
   };
 
   return (
     <div className='borderDiv'>
       <div>
-        <h3>프로젝트</h3>
+        <label><h3 className='topTitle'>프로젝트</h3></label>
+        <br />
         {
           project.map((data) => (
             <ProjectList key={data.id} data={data} loginUserId={loginUserId} isEditable={isEditable} />
           ))
         }
-        <Button onClick={() => { setForm(!form) }}>
-          {
-            form
-              ? '닫기'
-              : '작성하기'
-          }
-        </Button>
+        {
+          isEditable && (
+            <Button className='register' onClick={() => { setForm(!form) }}>
+              {
+                form
+                  ? '닫기'
+                  : '작성하기'
+              }
+            </Button>
+          )
+        }
         {
           form
           &&
@@ -148,10 +153,12 @@ function Project({ loginUserId, isEditable }) {
                 <section>
                   <label><h5>프로젝트명</h5></label>
                   <Controller placeholder="" as={TextField} name="project_nm" control={control} fullWidth defaultValue="" />
+                  {errors.project_nm && <p>프로젝트 이름을 입력해주세요.</p>}
                 </section>
                 <section>
                   <label><h5>프로젝트 상세</h5></label>
                   <Controller placeholder="" as={TextField} name="project_desc" control={control} fullWidth defaultValue="" />
+                  {errors.project_desc && <p>프로젝트 설명을 입력해주세요.</p>}
                 </section>
                 <section>
                   <label><h5>시작일</h5></label>
@@ -159,7 +166,7 @@ function Project({ loginUserId, isEditable }) {
                       id="date"
                       type="date"
                       name="project_st"
-                      defaultValue=""
+                      defaultValue="2021-03-08"
                       className={classes.textField}
                       InputLabelProps={{
                         shrink: true,
@@ -173,7 +180,7 @@ function Project({ loginUserId, isEditable }) {
                       id="date"
                       type="date"
                       name="project_et"
-                      defaultValue=""
+                      defaultValue="2021-03-08"
                       className={classes.textField}
                       InputLabelProps={{
                         shrink: true,
@@ -181,7 +188,7 @@ function Project({ loginUserId, isEditable }) {
                       onChange={handleChangeEndDate}
                     />
                 </section>
-                <input className="projectSubmit" type="submit" />
+                <input className="userSubmit" type="submit" />
               </form>
             </div>
           </ThemeProvider>
@@ -232,7 +239,7 @@ function ProjectList(props) {
     data.project_st = startDate;
     data.project_et = endDate;
 
-    console.log('data', data);
+    //console.log('data', data);
     //alert(JSON.stringify(data, null, 2));
     putProject(data);
   };
@@ -254,17 +261,17 @@ function ProjectList(props) {
   }
 
   const handleChangeStartDate = (e) => {
-    console.log(e.target.value)
+    //console.log(e.target.value)
     setStartDate(e.target.value);
   };
   const handleChangeEndDate = (e) => {
-    console.log(e.target.value)
+    //console.log(e.target.value)
     setEndDate(e.target.value);
   };
 
   return (
     <ThemeProvider theme={theme}>
-      <div className="container">
+      <div key={props.data.key} className="container">
         <form onSubmit={handleSubmit(onSubmit)}>
           <section>
             <label>
@@ -290,7 +297,7 @@ function ProjectList(props) {
           <section>
             <label><h5>프로젝트 상세</h5></label>
             <Controller disabled={isClicked ? false : true} placeholder="프로젝트상세" as={TextField} name="project_desc" control={control} fullWidth defaultValue={props.data.project_desc} />
-            {errors.project_desc && <p>프로젝트상세를 입력해주세요.</p>}
+            {errors.project_desc && <p>프로젝트 상세를 입력해주세요.</p>}
           </section>
           <section>
             <label><h5>시작일</h5></label>
@@ -304,6 +311,7 @@ function ProjectList(props) {
                 shrink: true,
               }}
               onChange={handleChangeStartDate}
+              disabled={isClicked ? false : true}
             />
           </section>
           <section>
@@ -318,12 +326,13 @@ function ProjectList(props) {
                 shrink: true,
               }}
               onChange={handleChangeEndDate}
+              disabled={isClicked ? false : true}
             />
           </section>
 
           <Controller type="hidden" as={TextField} name="id" control={control} defaultValue={props.data.id} />
           {
-            isClicked && (<input className="eduSubmit" type="submit" />)
+            isClicked && (<input className="userSubmit" type="submit" />)
           }
         </form>
       </div>

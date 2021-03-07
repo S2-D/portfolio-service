@@ -30,6 +30,10 @@ function HookForm({ setLoginUserId }) {
     loginFormPost(data);
   };
 
+  const onClickSignup = () => {
+    history.push('/signup');
+  }
+
   return (
     <form className="loginForm" onSubmit={handleSubmit(onSubmit)}>
       {/* Email */}
@@ -57,6 +61,7 @@ function HookForm({ setLoginUserId }) {
 
       {/* login button */}
       <input className='btnLogin' type="submit" value="Login" />
+      <input className='btnSignup' type="button" value="회원가입" onClick={onClickSignup}/>
     </form>
   );
 }

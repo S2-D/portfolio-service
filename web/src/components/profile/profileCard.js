@@ -64,7 +64,7 @@ export default function ProfileCard(props) {
         search: '?query=abc',
         state : { selectedId :selectedId }
       }) }} color="primary">포트폴리오 보기</Button> */}
-      <Button onClick={()=>{ history.push(`/user/${selectedId}`) }} color="primary">포트폴리오 보기</Button>
+      <Button onClick={()=>{ history.push(`/user/${selectedId}`) }} className="register">포트폴리오 보기</Button>
       </CardActions>
     </Card>
   );

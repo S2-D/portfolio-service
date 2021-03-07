@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
-import { Link, useHistory } from 'react-router-dom';
+import { Button } from 'react-bootstrap';
 import { useForm, Controller } from "react-hook-form";
 import axios from 'axios';
 
@@ -62,9 +61,9 @@ function License({ loginUserId, isEditable }) {
   axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
   useEffect(() => {
-    console.log(isEditable);
+    //console.log(isEditable);
     if (loginUserId != '') {
-      console.log('loginUserId', loginUserId);
+      //console.log('loginUserId', loginUserId);
       getLicenseList(loginUserId);
     }
   }, [loginUserId])
@@ -73,7 +72,7 @@ function License({ loginUserId, isEditable }) {
   const getLicenseList = (data) => {
     axios.get(`http://${window.location.hostname}:5000/license/?user_id=${data}`, {})
       .then(response => {
-        console.log(response)
+        //console.log(response)
 
         for (let i in response.data.result) {
           const license_get_date = new Date(response.data.result[i].license_get_date);
@@ -90,8 +89,9 @@ function License({ loginUserId, isEditable }) {
     data.user_id = loginUserId;
     axios.post(`http://${window.location.hostname}:5000/license/`, data)
       .then(response => {
-        console.log("response: ", response.data.result)
+        //console.log("response: ", response.data.result)
         getLicenseList(loginUserId);
+        setForm(false);
       }).catch(() => {
         console.log("fail")
       })
@@ -100,7 +100,7 @@ function License({ loginUserId, isEditable }) {
   // 자격증 form 제출
   const onSubmit = (data) => {
     data.license_get_date = date;
-    console.log('data', data);
+    //console.log('data', data);
     // alert(JSON.stringify(data, null, 2));
     postLicense(data);
   };
@@ -113,27 +113,31 @@ function License({ loginUserId, isEditable }) {
   });
 
   const handleChangeDate = (e) => {
-    console.log(e.target.value)
+    //console.log(e.target.value)
     setDate(e.target.value);
   };
 
   return (
     <div className='borderDiv'>
       <div>
-        <h3>자격증</h3>
+        <label><h3 className='topTitle'>자격증</h3></label>
         <br />
         {
           license.map((data) => (
             <LicenseList key={data.id} data={data} loginUserId={loginUserId} isEditable={isEditable} />
           ))
         }
-        <Button onClick={() => { setForm(!form) }}>
-          {
-            form
-              ? '닫기'
-              : '작성하기'
-          }
-        </Button>
+        {
+          isEditable && (
+            <Button className='register' onClick={() => { setForm(!form) }}>
+              {
+                form
+                  ? '닫기'
+                  : '작성하기'
+              }
+            </Button>
+          )
+        }
         {
           form
           &&
@@ -164,7 +168,7 @@ function License({ loginUserId, isEditable }) {
                     onChange={handleChangeDate}
                   />
                 </section>
-                <input className="licenseSubmit" type="submit" />
+                <input className="userSubmit" type="submit" />
               </form>
             </div>
           </ThemeProvider>
@@ -248,7 +252,7 @@ function LicenseList(props) {
 
   return (
     <ThemeProvider theme={theme}>
-      <div className="container">
+      <div key={props.data.key} className="container">
         <form onSubmit={handleSubmit(onSubmit)}>
           <section>
             <label>
@@ -270,38 +274,37 @@ function LicenseList(props) {
             </label>
             <Controller disabled={isClicked ? false : true} as={TextField} name="license_nm" control={control} fullWidth defaultValue={props.data.license_nm} />
             {errors.license_nm && <p> 자격증 이름을 입력해주세요.</p>}
-            </section>
-            <section>
-              <label><h5>발급기관</h5></label>
-              <Controller disabled={isClicked ? false : true} as={TextField} name="license_issuing_org" control={control} fullWidth defaultValue={props.data.license_issuing_org} />
-              {errors.license_issuing_org && <p>발급 기관을 입력해주세요.</p>}
-            </section>
-            <section>
-              <label><h5>발급일</h5></label>
-              <TextField
-                id="date"
-                type="date"
-                name="license_get_date"
-                defaultValue={props.data.license_get_date}
-                className={classes.textField}
-                control={control}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                onChange={handleChangeDate}
-              />
-            </section>
+          </section>
+          <section>
+            <label><h5>발급기관</h5></label>
+            <Controller disabled={isClicked ? false : true} as={TextField} name="license_issuing_org" control={control} fullWidth defaultValue={props.data.license_issuing_org} />
+            {errors.license_issuing_org && <p>발급 기관을 입력해주세요.</p>}
+          </section>
+          <section>
+            <label><h5>발급일</h5></label>
+            <TextField
+              id="date"
+              type="date"
+              name="license_get_date"
+              defaultValue={props.data.license_get_date}
+              className={classes.textField}
+              control={control}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              onChange={handleChangeDate}
+            />
+          </section>
 
-            <Controller type="hidden" as={TextField} name="id" control={control} defaultValue={props.data.id} />
-            {
-              isClicked && (<input className="eduSubmit" type="submit" />)
-            }
+          <Controller type="hidden" as={TextField} name="id" control={control} defaultValue={props.data.id} />
+          {
+            isClicked && (<input className="userSubmit" type="submit" />)
+          }
         </form>
       </div>
     </ThemeProvider>
 
   )
 }
-
 
 export default License;
