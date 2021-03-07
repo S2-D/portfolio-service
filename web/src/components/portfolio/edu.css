@@ -102,9 +102,22 @@ body {
       color: white;
       text-transform: uppercase;
       border: none;
-      margin-top: 10px;
       padding: 10px;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 100;
       letter-spacing: 10px;
+      margin-top: 10px;
+  }
+
+  .floatR {
+    float: right;
+  }
+
+  .borderDiv {
+    border: 1px solid #ec5990;
+    margin: 20px;
+  }
+
+  section {
+    margin: 20px;
   }

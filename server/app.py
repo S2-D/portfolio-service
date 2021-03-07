@@ -56,6 +56,10 @@ def create_app():
 
     app.register_blueprint(network.bp)
 
+    import profile
+
+    app.register_blueprint(profile.bp)
+
     with app.app_context():
         import db
 

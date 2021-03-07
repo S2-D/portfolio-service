@@ -12,6 +12,7 @@ cursor = db.cursor()
 # for License api
 license_parser = reqparse.RequestParser()
 license_parser.add_argument('id')
+license_parser.add_argument('user_id')
 license_parser.add_argument('license_nm')
 license_parser.add_argument('license_get_date')
 license_parser.add_argument('license_issuing_org')
@@ -28,12 +29,13 @@ class License(Resource):
     @jwt_required()
     def get(self):
         result = []
-        sql = "SELECT license_nm, license_get_date, license_issuing_org FROM `license` WHERE `user_id` = %s"
+        args = license_parser.parse_args()
+        sql = "SELECT id, user_id, license_nm, license_get_date, license_issuing_org FROM `license` WHERE `user_id` = %s"
         cursor.execute(sql, (args['user_id'] ))
         licenses = cursor.fetchall()
         for license in licenses:
             result.append(
-                {'license_nm': license[0], 'license_get_date': license[1], 'license_issuing_org' : license[2]}
+                {'id': license[0], 'user_id': license[1], 'license_nm': license[2], 'license_get_date': license[3], 'license_issuing_org' : license[4]}
             )
         return jsonify(status = "success", result = result)
 

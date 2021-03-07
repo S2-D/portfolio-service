@@ -11,6 +11,7 @@ cursor = db.cursor()
 
 # for Project api
 project_parser = reqparse.RequestParser()
+project_parser.add_argument('id')
 project_parser.add_argument('user_id')
 project_parser.add_argument('project_nm')
 project_parser.add_argument('project_desc')
@@ -31,12 +32,12 @@ class Project(Resource):
     def get(self):
         result = []
         args = project_parser.parse_args()
-        sql = "SELECT project_nm, project_desc, project_st, project_et FROM `project` WHERE `user_id` = %s"
+        sql = "SELECT id, user_id, project_nm, project_desc, project_st, project_et FROM `project` WHERE `user_id` = %s"
         cursor.execute(sql, (args['user_id']))
         projects = cursor.fetchall()
         for project in projects:
             result.append(
-                {'project_nm': project[0], 'project_desc': project[1], 'project_st' : project[2], 'project_et' : project[3]}
+                {'id': project[0], 'user_id': project[1], 'project_nm': project[2], 'project_desc': project[3], 'project_st' : project[4], 'project_et' : project[5]}
             )
         return jsonify(status = "success", result = result)
 

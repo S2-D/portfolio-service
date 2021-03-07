@@ -11,6 +11,7 @@ cursor = db.cursor()
 
 # for Awards api
 awards_parser = reqparse.RequestParser()
+awards_parser.add_argument('id')
 awards_parser.add_argument('user_id')
 awards_parser.add_argument('awards_nm')
 awards_parser.add_argument('awards_desc')
@@ -29,12 +30,12 @@ class Awards(Resource):
     def get(self):
         result = []
         args = awards_parser.parse_args()
-        sql = "SELECT awards_nm, awards_desc FROM `awards` WHERE `user_id` = %s"
+        sql = "SELECT id, user_id, awards_nm, awards_desc, awards_ins_date, awards_udt_date FROM `awards` WHERE `user_id` = %s"
         cursor.execute(sql, (args['user_id'] ))
         awards = cursor.fetchall()
         for award in awards:
             result.append(
-                {'awards_nm': award[0], 'awards_desc': award[1]}
+                {'id': award[0], 'user_id': award[1], 'awards_nm': award[2],'awards_desc': award[3], 'awards_ins_date': award[4], 'awards_udt_date': award[5]}
             )
         return jsonify(status = "success", result = result)
 

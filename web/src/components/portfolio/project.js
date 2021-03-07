@@ -2,27 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
 import { Link, useHistory, Redirect } from 'react-router-dom'
 import { useForm, Controller } from "react-hook-form";
+import axios from 'axios';
+
+import { makeStyles } from '@material-ui/core/styles';
 import {
   TextField,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
   ThemeProvider,
   createMuiTheme
 } from "@material-ui/core";
-import {
-  KeyboardDatePicker,
-  MuiPickersUtilsProvider
-} from "@material-ui/pickers";
 import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
-import * as yup from 'yup'
-import axios from 'axios';
-
-// DatePicker
-import DatePicker from "react-datepicker";
-import { ko } from "date-fns/esm/locale";
-import "react-datepicker/dist/react-datepicker.css";
+import Moment from 'react-moment';
 
 const ProjectSchema = yup.object().shape({
   project_nm: yup
@@ -32,83 +23,113 @@ const ProjectSchema = yup.object().shape({
     .string()
     .required(),
   project_st: yup
-    .date(),
-  // .integer()
+    .date()
   // .required()
+  ,
   project_et: yup
     .date()
-  //   // .number()
-  //   // .integer()
+  // .required()
 });
 
-function Project() {
-  const { register, control, handleSubmit, errors } = useForm({ resolver: yupResolver(ProjectSchema) });
-  const onSubmit = (data) => {
-    console.log('data', data);
-    alert(JSON.stringify(data, null, 2));
-    postProject(data);
-  };
+/* react-hook-form theme 생성 */
+const theme = createMuiTheme({
+  palette: {
+    type: "dark"
+  }
+});
 
-  const [form, setForm] = useState(false);
+const useStyles = makeStyles((theme) => ({
+  container: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  textField: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    width: 200,
+  },
+}));
+
+const getFormatDate = (date) => {
+  let year = date.getFullYear();
+  let month = (1 + date.getMonth());
+  month = month >= 10 ? month : '0' + month;
+  let day = date.getDate();
+  day = day >= 10 ? day : '0' + day;
+  return year + '-' + month + '-' + day;
+}
+
+function Project({ loginUserId, isEditable }) {
+  const history = useHistory();
+  const classes = useStyles();
   const [project, setProject] = useState([]);
-  const [userid, setUserid] = useState('');
-  const [isLogin, setIsLogin] = useState(false);
-
+  const [form, setForm] = useState(false);
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
+  const { register, control, handleSubmit, errors } = useForm({ resolver: yupResolver(ProjectSchema) });
 
   const access_token = localStorage.getItem('access_token');
   axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
-  let history = useHistory();
-
   useEffect(() => {
-    axios.get(`http://${window.location.hostname}:5000/auth/protected`, {})
-      .then(response => {
+    if (loginUserId != '') {
+      console.log('loginUserId', loginUserId);
+      getProjectList(loginUserId);
+    }
+  }, [loginUserId])
 
-        getProjectList(response.data.logged_in_as);
-        setUserid(response.data.logged_in_as);
-        setIsLogin(true);
+  const onSubmit = (data) => {
+    data.project_st = startDate;
+    data.project_et = endDate;
 
-      }).catch((error) => {
-        alert('로그인 후 이용해주세요.');
-        history.push('/login');
-        return;
-      })
-  }, [])
+    console.log('data', data);
+    //alert(JSON.stringify(data, null, 2));
+    postProject(data);
+  };
 
   const getProjectList = (data) => {
     axios.get(`http://${window.location.hostname}:5000/project/?user_id=${data}`, {})
       .then(response => {
-        console.log(response)
-        setProject(response.data.result)
+
+        for (let i in response.data.result) {
+          const project_st = new Date(response.data.result[i].project_st);
+          const project_et = new Date(response.data.result[i].project_et);
+
+          response.data.result[i].project_st = getFormatDate(project_st);
+          response.data.result[i].project_et = getFormatDate(project_et);
+        }
+
+        setProject(response.data.result);
       })
   }
 
   const postProject = (data) => {
-    data.user_id = userid;
+    data.user_id = loginUserId;
     axios.post(`http://${window.location.hostname}:5000/project/`, data)
       .then(response => {
         console.log("response: ", response.data.result);
-        getProjectList(userid);
+        getProjectList(loginUserId);
       }).catch(() => {
         console.log("fail")
       })
   }
-    const theme = createMuiTheme({
-      palette: {
-        type: "dark"
-      }
-    });
+
+  const handleChangeStartDate = (e) => {
+    console.log(e.target.value)
+    setStartDate(e.target.value);
+  };
+  const handleChangeEndDate = (e) => {
+    console.log(e.target.value)
+    setEndDate(e.target.value);
+  };
 
   return (
-    <div>
-      {isLogin ? <div>
+    <div className='borderDiv'>
+      <div>
         <h3>프로젝트</h3>
-        <br />
         {
           project.map((data) => (
-            <ProjectList key={data.id} data={data} />
+            <ProjectList key={data.id} data={data} loginUserId={loginUserId} isEditable={isEditable} />
           ))
         }
         <Button onClick={() => { setForm(!form) }}>
@@ -120,143 +141,194 @@ function Project() {
         </Button>
         {
           form
-            &&
-            <ThemeProvider theme={theme}>
+          &&
+          <ThemeProvider theme={theme}>
             <div className="container">
               <form onSubmit={handleSubmit(onSubmit)}>
                 <section>
                   <label><h5>프로젝트명</h5></label>
-                  <Controller placeholder="" as={TextField} name="project_nm" control={control} fullWidth defaultValue="new Date()" ref={register} />
+                  <Controller placeholder="" as={TextField} name="project_nm" control={control} fullWidth defaultValue="" />
                 </section>
                 <section>
                   <label><h5>프로젝트 상세</h5></label>
-                  <Controller placeholder="" as={TextField} name="project_desc" control={control} fullWidth defaultValue="new Date()" ref={register} />
+                  <Controller placeholder="" as={TextField} name="project_desc" control={control} fullWidth defaultValue="" />
                 </section>
                 <section>
                   <label><h5>시작일</h5></label>
-                  <Controller placeholder="" as={TextField} name="project_st" control={control} fullWidth defaultValue="" ref={register} />
-                </section>
-                <section>
-                  <label>MUI Picker</label>
-                  <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    <Controller
-                      name="MUIPicker"
-                      control={control}
-                      render={({ ref, ...rest }) => (
-                        <KeyboardDatePicker
-                          margin="normal"
-                          id="date-picker-dialog"
-                          label="Date picker dialog"
-                          format="MM/dd/yyyy"
-                          KeyboardButtonProps={{
-                            "aria-label": "change date"
-                          }}
-                          {...rest}
-                        />
-                      )}
+                    <TextField
+                      id="date"
+                      type="date"
+                      name="project_st"
+                      defaultValue=""
+                      className={classes.textField}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      onChange={handleChangeStartDate}
                     />
-                  </MuiPickersUtilsProvider>
                 </section>
                 <section>
                   <label><h5>종료일</h5></label>
-                  <Controller placeholder="" as={TextField} name="project_et" control={control} fullWidth defaultValue="" ref={register} />
+                    <TextField
+                      id="date"
+                      type="date"
+                      name="project_et"
+                      defaultValue=""
+                      className={classes.textField}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      onChange={handleChangeEndDate}
+                    />
                 </section>
-                <input className="projectSubmit" type="submit"/>
+                <input className="projectSubmit" type="submit" />
               </form>
             </div>
           </ThemeProvider>
-            // <Formik
-            //   validationSchema={schema} a
-            //   onSubmit={(values) => {
-            //     console.log("values", values);
-            //     // alert(JSON.stringify(values, null, 2));
-            //     postProject(values);
-            //   }}
-            //   initialValues={{
-            //     project_nm: '',
-            //     project_desc: '',
-            //     project_st: '',
-            //     project_et: ''
-            //   }}
-            // >
-            //   {({
-            //     handleSubmit,
-            //     handleChange,
-            //     values,
-            //   }) => (
-            //     <Form noValidate onSubmit={handleSubmit}>
-            //       {/* 프로젝트명 */}
-            //       <Form.Group>
-            //         <Form.Label >프로젝트명</Form.Label>
-            //         <InputGroup hasValidation>
-            //           <Form.Control
-            //             type="text"
-            //             name="project_nm"
-            //             value={values.project_nm}
-            //             onChange={handleChange}
-            //           />
-            //         </InputGroup>
-            //         <ErrorMessage name="project_nm" component="p" />
-            //       </Form.Group>
-            //       {/* 프로젝트 내용  */}
-            //       <Form.Group>
-            //         <Form.Label>내용</Form.Label>
-            //         <Form.Control
-            //           type="text"
-            //           name="project_desc"
-            //           value={values.project_desc}
-            //           onChange={handleChange}
-            //         />
-            //         <ErrorMessage name="project_desc" component="p" />
-            //       </Form.Group>
-
-            //       <Form.Group>
-            //         시작일{startDate}
-            //         <DatePicker
-            //           locale={ko}	// 언어설정 기본값은 영어
-            //           dateFormat="yyyy-MM-dd"	// 날짜 형식 설정
-            //           className="input-datepicker"	// 클래스 명 지정 css주기 위해
-            //           closeOnScroll={true}	// 스크롤을 움직였을 때 자동으로 닫히도록 설정 기본값 false
-            //           placeholderText="시작일"	// placeholder
-            //           selected={startDate}	// value
-            //           onChange={(date) => setStartDate(date)}	// 날짜를 선택하였을 때 실행될 함수
-            //         />
-                    
-            //         <DatePicker
-            //           locale={ko}
-            //           dateFormat="yyyy-MM-dd"
-            //           className="input-datepicker"
-            //           closeOnScroll={true}
-            //           placeholderText="종료일"
-            //           selected={endDate}
-            //           onChange={(date) => setEndDate(date)}
-            //         />
-            //       </Form.Group>
-            //       <div>
-            //         <Button inline type="submit">확인</Button>
-            //       </div>
-            //     </Form>
-            //   )}
-            // </Formik>
         }
-      </div> : <div></div>}
+      </div>
     </div>
   );
 }
 
 function ProjectList(props) {
+  const { control, handleSubmit, errors } = useForm({ resolver: yupResolver(ProjectSchema) });
+  const [isClicked, setIsClicked] = useState(false);
+  const [startDate, setStartDate] = useState();
+  const [endDate, setEndDate] = useState();
+  const classes = useStyles();
+
+  useEffect(() => {
+    setStartDate(props.data.project_st);
+    setEndDate(props.data.project_et);
+  }, []);
+
+  const onClickModify = (e) => {
+    e.preventDefault();
+
+    if (isClicked) {
+      setIsClicked(false);
+    } else {
+      setIsClicked(true);
+    }
+  }
+
+  const onClickDelete = (e) => {
+    const id = e.target.dataset.id;
+
+    if (window.confirm('삭제 하시겠습니까?')) {
+      axios.delete(`http://${window.location.hostname}:5000/project/?id=${id}`, {})
+        .then(response => {
+          //수정
+          window.location.reload();
+
+        }).catch(() => {
+          console.log("fail")
+        })
+    }
+  }
+
+  const onSubmit = (data) => {
+    data.project_st = startDate;
+    data.project_et = endDate;
+
+    console.log('data', data);
+    //alert(JSON.stringify(data, null, 2));
+    putProject(data);
+  };
+
+  /* edu put */
+  const putProject = (data) => {
+    data.user_id = props.loginUserId;
+
+    if (window.confirm('수정 하시겠습니까?')) {
+      axios.put(`http://${window.location.hostname}:5000/project/`, data)
+        .then(response => {
+          setIsClicked(false);
+          alert("저장되었습니다.");
+        }).catch(() => {
+          console.log("fail")
+        })
+    }
+
+  }
+
+  const handleChangeStartDate = (e) => {
+    console.log(e.target.value)
+    setStartDate(e.target.value);
+  };
+  const handleChangeEndDate = (e) => {
+    console.log(e.target.value)
+    setEndDate(e.target.value);
+  };
+
   return (
-    <div key={props.data.key}>
-      <label><h5>프로젝트명</h5></label>
-      <span className='mgl30'>{props.data.project_nm} </span>
-      <label><h5>프로젝트 상세</h5></label>
-      <span className='mgl30'>{props.data.project_desc}</span>
-      <label><h5>프로젝트 기간</h5></label>
-      <span className='mgl30'> : {props.data.project_st} / {props.data.project_et}</span>
-      <hr />
-    </div>
+    <ThemeProvider theme={theme}>
+      <div className="container">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <section>
+            <label>
+              <h5>프로젝트명</h5>
+              {
+                props.isEditable && (
+                  <span className='floatR'>
+                    {
+                      isClicked ? (
+                        <a href='#' onClick={onClickModify}>닫기</a>
+                      ) : (
+                          <a href='#' onClick={onClickModify}>수정</a>
+                        )
+                    }
+                  &nbsp; &nbsp; <a href='#' data-id={props.data.id} onClick={onClickDelete}>삭제</a>
+                  </span>
+                )
+              }
+            </label>
+            <Controller className='textFont' disabled={isClicked ? false : true} placeholder="프로젝트명" as={TextField} name="project_nm" control={control} fullWidth defaultValue={props.data.project_nm} />
+            {errors.project_nm && <p>프로젝트명을 입력해주세요.</p>}
+          </section>
+          <section>
+            <label><h5>프로젝트 상세</h5></label>
+            <Controller disabled={isClicked ? false : true} placeholder="프로젝트상세" as={TextField} name="project_desc" control={control} fullWidth defaultValue={props.data.project_desc} />
+            {errors.project_desc && <p>프로젝트상세를 입력해주세요.</p>}
+          </section>
+          <section>
+            <label><h5>시작일</h5></label>
+            <TextField
+              id="date"
+              type="date"
+              name="project_st"
+              defaultValue={props.data.project_st}
+              className={classes.textField}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              onChange={handleChangeStartDate}
+            />
+          </section>
+          <section>
+            <label><h5>종료일</h5></label>
+            <TextField
+              id="date"
+              type="date"
+              name="project_et"
+              defaultValue={props.data.project_et}
+              className={classes.textField}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              onChange={handleChangeEndDate}
+            />
+          </section>
+
+          <Controller type="hidden" as={TextField} name="id" control={control} defaultValue={props.data.id} />
+          {
+            isClicked && (<input className="eduSubmit" type="submit" />)
+          }
+        </form>
+      </div>
+    </ThemeProvider>
   )
 }
 
 export default Project;
-

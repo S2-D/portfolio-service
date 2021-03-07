@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
-import { Link, useHistory, Redirect } from 'react-router-dom'
+import React, { useEffect, useState  } from 'react';
+import { Button } from 'react-bootstrap';
 import { useForm, Controller } from "react-hook-form";
 import {
   TextField,
@@ -12,10 +11,9 @@ import {
 } from "@material-ui/core";
 import { yupResolver } from '@hookform/resolvers/yup';
 
-
-
 import * as yup from 'yup'
 import axios from 'axios';
+import { StateContext } from "../../App";
 
 import './edu.css';
 
@@ -28,84 +26,73 @@ const EduSchema = yup.object().shape({
     .required(),
   edu_gd_ck: yup
     .number()
-    .integer(),
-  // .required()
-  user_id: yup
-    .number()
-  //   // .number()
-  //   // .integer()
+    .integer()
+  .required()
 });
 
-function Edu() {
-  const { register, control, handleSubmit, errors } = useForm({ resolver: yupResolver(EduSchema) });
-  const onSubmit = (data) => {
-    console.log('data', data);
-    alert(JSON.stringify(data, null, 2));
-    postEdu(data);
-  };
+/* react-hook-form theme 생성 */
+const theme = createMuiTheme({
+  palette: {
+    type: "dark"
+  }
+});
 
-  const [form, setForm] = useState(false);
+
+function Edu({loginUserId, isEditable}) {
+  /* useState */
   const [edu, setEdu] = useState([]);
-  const [userid, setUserid] = useState('');
-  const [isLogin, setIsLogin] = useState(false);
+  const [form, setForm] = useState(false);
 
+  const { control, handleSubmit, errors } = useForm({ resolver: yupResolver(EduSchema) });
+
+  /* access_token 조회 */
   const access_token = localStorage.getItem('access_token');
   axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-
-  let history = useHistory();
-
+  
   useEffect(() => {
-    axios.get(`http://${window.location.hostname}:5000/auth/protected`, {})
-      .then(response => {
+    if(loginUserId != ''){
+      console.log('loginUserId',loginUserId);
+      getEduList(loginUserId);
+    }
+  }, [loginUserId])
 
-        getEduList(response.data.logged_in_as);
-        setUserid(response.data.logged_in_as);
-        setIsLogin(true);
-
-      }).catch((error) => {
-        alert('로그인 후 이용해주세요.');
-        history.push('/login');
-        return;
-      })
-  }, [])
-
+  /* edu get */
   const getEduList = (data) => {
     axios.get(`http://${window.location.hostname}:5000/edu/?user_id=${data}`, {})
       .then(response => {
-        console.log(response);
+        console.log(response) 
         setEdu(response.data.result);
       })
   }
 
+  /* edu post */
   const postEdu = (data) => {
-    data.user_id = userid;
+    data.user_id = loginUserId;
     axios.post(`http://${window.location.hostname}:5000/edu/`, data)
       .then(response => {
         console.log("response: ", response.data.result);
-        getEduList(userid);
+        getEduList(loginUserId);
       }).catch(() => {
         console.log("fail")
       })
   }
 
-  const theme = createMuiTheme({
-    palette: {
-      type: "dark"
-    }
-  });
+  /* 학력 form 제출 */
+  const onSubmit = (data) => {
+    //console.log('data', data);
+    //alert(JSON.stringify(data, null, 2));
+    postEdu(data);
+  };
 
   return (
-    <div>
-      {/* <OutlinedCard/> */}
-      {isLogin ? <div>
+    <div className='borderDiv'>
         <label><h3>학력</h3></label>
-        <br />
         {
           edu.map((data) => (
-            <EduList key={data.id} data={data} />
+            <EduList key={data.id} data={data} loginUserId={loginUserId} isEditable={isEditable}/>
           ))
         }
-        <Button onClick={() => { setForm(!form) }}>
+        <Button className='btnSubmit' onClick={() => { setForm(!form) }}>
           {
             form
               ? '닫기'
@@ -120,60 +107,143 @@ function Edu() {
               <form onSubmit={handleSubmit(onSubmit)}>
                 <section>
                   <label><h5>학교</h5></label>
-                  <Controller placeholder="school" as={TextField} name="edu_sc_nm" control={control} fullWidth defaultValue="" ref={register} />
+                  <Controller placeholder="학교" as={TextField} name="edu_sc_nm" control={control} fullWidth defaultValue="" />
+                  {errors.edu_sc_nm && <p>학교이름을 입력해주세요.</p>}
                 </section>
                 <section>
                   <label><h5>전공</h5></label>
-                  <Controller placeholder="major" as={TextField} name="edu_major" control={control} fullWidth defaultValue="" ref={register} />
+                  <Controller placeholder="전공" as={TextField} name="edu_major" control={control} fullWidth defaultValue="" />
+                  {errors.edu_major && <p>전공을 입력해주세요.</p>}
                 </section>
                 <section>
                   <Controller
                     as={
-                      <RadioGroup row aria-label="position" name="edu_gd_ck" ref={register}>
+                      <RadioGroup row aria-label="position" name="edu_gd_ck">
                         <FormControlLabel value="1" control={<Radio />} label="재학중" />
                         <FormControlLabel value="2" control={<Radio />} label="학사졸업" />
                         <FormControlLabel value="3" control={<Radio />} label="석사졸업" />
                         <FormControlLabel value="4" control={<Radio />} label="박사졸업" />
                       </RadioGroup>
                     }
-                    name="RadioGroup"
+                    name="edu_gd_ck"
                     control={control}
                     defaultValue=""
                   />
+                  {errors.edu_gd_ck && <p>상태를 선택해주세요.</p>}
                 </section>
                 <input className="eduSubmit" type="submit" />
               </form>
             </div>
           </ThemeProvider>
         }
-      </div> : <div></div>}
     </div>
   );
 }
 
 function EduList(props) {
-  const [status, setStatus] = useState('');
+  const { control, handleSubmit, errors } = useForm({ resolver: yupResolver(EduSchema) });
+  const [isClicked, setIsClicked] = useState(false);
 
-  useEffect(() => {
-    if (props.data.edu_gd_ck == '1') {
-      setStatus('재학중');
-    } else if (props.data.edu_gd_ck == '2') {
-      setStatus('학사졸업');
-    } else if (props.data.edu_gd_ck == '3') {
-      setStatus('석사졸업');
+  const onClickModify = (e) => {
+    e.preventDefault();
+    
+    if(isClicked) {
+      setIsClicked(false);
     } else {
-      setStatus('박사졸업');
+      setIsClicked(true);
     }
-  }, [])
+  }
+
+  const onClickDelete = (e) => {
+    const id = e.target.dataset.id;
+
+    if (window.confirm('삭제 하시겠습니까?')) {
+      axios.delete(`http://${window.location.hostname}:5000/edu/?id=${id}`, {})
+      .then(response => {
+        //수정
+        window.location.reload();
+
+      }).catch(() => {
+        console.log("fail")
+      })
+    }
+  }
+
+  const onSubmit = (data) => {
+    //console.log('data', data);
+    //alert(JSON.stringify(data, null, 2));
+    putEdu(data);
+  };
+
+  /* edu put */
+  const putEdu = (data) => {
+    data.user_id = props.loginUserId;
+
+    if (window.confirm('수정 하시겠습니까?')) {
+      axios.put(`http://${window.location.hostname}:5000/edu/`, data)
+      .then(response => {
+        setIsClicked(false);
+        alert("저장되었습니다.");
+      }).catch(() => {
+        console.log("fail")
+      })
+    }
+    
+  }
 
   return (
-    <div key={props.data.key}>
-      <label><h5>학교 및 전공</h5></label>
-      <span className='mgl30'> : {props.data.edu_sc_nm} / {props.data.edu_major}</span>
-      <label><h5>상태</h5></label>
-      <span className='mgl30'> - {status}</span>
-      <hr></hr>
-    </div>
+      <ThemeProvider theme={theme}>
+        <div className="container">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <section>
+              <label>
+                <h5>학교</h5>
+                {
+                  props.isEditable && (
+                  <span className='floatR'>
+                    {
+                      isClicked ? (
+                      <a href='#' onClick={onClickModify}>닫기</a>
+                      ) : (
+                      <a href='#' onClick={onClickModify}>수정</a>
+                      )
+                    }
+                    &nbsp; &nbsp; <a href='#' data-id={props.data.id} onClick={onClickDelete}>삭제</a>
+                  </span>
+                  )
+                }
+              </label>
+              <Controller disabled={isClicked ? false : true} placeholder="학교" as={TextField} name="edu_sc_nm" control={control} fullWidth defaultValue={props.data.edu_sc_nm} />
+              {errors.edu_sc_nm && <p>학교이름을 입력해주세요.</p>}
+            </section>
+            <section>
+              <label><h5>전공</h5></label>
+              <Controller disabled={isClicked ? false : true} placeholder="전공" as={TextField} name="edu_major" control={control} fullWidth defaultValue={props.data.edu_major} />
+              {errors.edu_major && <p>전공을 입력해주세요.</p>}
+            </section>
+            <section>
+              <Controller
+                as={
+                    <RadioGroup row aria-label="position" name="edu_gd_ck" value={props.data.edu_gd_ck}>
+                      <FormControlLabel disabled={isClicked ? false : true} value="1" control={<Radio />} label="재학중" />
+                      <FormControlLabel disabled={isClicked ? false : true} value="2" control={<Radio />} label="학사졸업" />
+                      <FormControlLabel disabled={isClicked ? false : true} value="3" control={<Radio />} label="석사졸업" />
+                      <FormControlLabel disabled={isClicked ? false : true} value="4" control={<Radio />} label="박사졸업" />
+                    </RadioGroup>
+                }
+                name="edu_gd_ck"
+                control={control}
+                defaultValue={props.data.edu_gd_ck.toString()}
+              />
+              {errors.edu_gd_ck && <p>상태를 선택해주세요.</p>}
+            </section>
+            <Controller type="hidden" as={TextField} name="id" control={control} defaultValue={props.data.id} />
+            {
+              isClicked && (<input className="eduSubmit" type="submit" />)
+            }
+          </form>
+        </div>
+      </ThemeProvider>
   )
 }
 
