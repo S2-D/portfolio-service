@@ -60,9 +60,9 @@ def create_app():
 
     app.register_blueprint(profile.bp)
 
-    with app.app_context():
-        import db
+    # with app.app_context():
+    #     import db
 
-        db.init_db()
+    #     db.init_db()
 
     return app

@@ -160,7 +160,7 @@ function License({ loginUserId, isEditable }) {
                     id="date"
                     type="date"
                     name="license_get_date"
-                    defaultValue=""
+                    defaultValue="2021-03-08"
                     className={classes.textField}
                     InputLabelProps={{
                       shrink: true,
@@ -293,6 +293,7 @@ function LicenseList(props) {
                 shrink: true,
               }}
               onChange={handleChangeDate}
+              disabled={isClicked ? false : true}
             />
           </section>
 

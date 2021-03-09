@@ -21,6 +21,8 @@ const theme = createMuiTheme({
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    margin :20,
+    width : 1070
   },
 
   title: {
@@ -44,13 +46,14 @@ axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
 useEffect(() => {
   if(loginUserId != ''){
-    //console.log('loginUserId',loginUserId);
+    console.log('loginUserId',loginUserId);
     getUserInfo(loginUserId);
   }
 }, [loginUserId])
 
   /* edu get */
   const getUserInfo = (data) => {
+    console.log('data' ,data)
     axios.get(`http://${window.location.hostname}:5000/profile/?id=${data}`, {})
       .then(response => {
         //console.log(response) 
@@ -64,7 +67,7 @@ useEffect(() => {
   
   return (
     <Card className={classes.root} variant="outlined">
-      <CardContent>
+      <CardContent className={classes.content}>
         <Avatar alt="Remy Sharp" src="/static/images/avatar/1.jpg" className={classes.large} />
           {
             userInfo.map((data) => (

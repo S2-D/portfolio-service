@@ -35,7 +35,7 @@ function User() {
         return;
       })
 
-    setSelectedId(Number(id[0]));
+    setSelectedId(Number(id));
 
   }, [])
 
@@ -53,11 +53,11 @@ function User() {
             {
               loginUserId => (
                 <div>
-                  <Profile loginUserId={id[0]} isEditable={selectedId == loginUserId} />
-                  <Edu loginUserId={id[0]} isEditable={selectedId == loginUserId} />
-                  <Awards loginUserId={id[0]} isEditable={selectedId == loginUserId} />
-                  <Project loginUserId={id[0]} isEditable={selectedId == loginUserId} />
-                  <License loginUserId={id[0]} isEditable={selectedId == loginUserId} />
+                  <Profile loginUserId={id} isEditable={selectedId == loginUserId} />
+                  <Edu loginUserId={id} isEditable={selectedId == loginUserId} />
+                  <Awards loginUserId={id} isEditable={selectedId == loginUserId} />
+                  <Project loginUserId={id} isEditable={selectedId == loginUserId} />
+                  <License loginUserId={id} isEditable={selectedId == loginUserId} />
                 </div>
               )
             }

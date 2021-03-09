@@ -57,7 +57,7 @@ function HookForm({ setLoginUserId }) {
         placeholder="password"
         ref={register({ required: true, maxLength: 10 })}
       />
-      {errors.password && <p>패스워드를 입력해주세요.</p>}
+      {/* {errors.password && <p>패스워드를 입력해주세요.</p>} */}
 
       {/* login button */}
       <input className='btnLogin' type="submit" value="Login" />

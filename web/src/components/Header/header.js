@@ -11,7 +11,6 @@ function Header({userid, setLoginUserId}){
     let history = useHistory();
 
     useEffect(()=>{
-
       userid == '' ? setIsLogin(false) : setIsLogin(true);
       setUrl(`/user/${userid}`);
       
@@ -20,7 +19,7 @@ function Header({userid, setLoginUserId}){
 
     return(
         <Navbar className="" bg="dark" variant="dark">
-          <Navbar.Brand href=''>Portfolio </Navbar.Brand>
+          <Navbar.Brand href=''>RacerIn 🐇 </Navbar.Brand>
           <Nav className="ml-auto">
             {
               !isLogin && (

@@ -38,6 +38,7 @@ class Network(Resource):
             result.append(
                 {'id': network[0], 'email': network[1] , 'username': network[3]}
             )
+
         return jsonify(status = "success", result = result)
     
 api.add_resource(Network, '/')

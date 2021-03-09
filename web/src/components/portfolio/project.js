@@ -23,11 +23,9 @@ const ProjectSchema = yup.object().shape({
     .required(),
   project_st: yup
     .date()
-    .required()
   ,
   project_et: yup
     .date()
-    .required()
 });
 
 /* react-hook-form theme 생성 */
@@ -305,7 +303,7 @@ function ProjectList(props) {
               id="date"
               type="date"
               name="project_st"
-              defaultValue={props.data.project_st}
+              defaultValue="2021-03-08"
               className={classes.textField}
               InputLabelProps={{
                 shrink: true,
@@ -320,7 +318,7 @@ function ProjectList(props) {
               id="date"
               type="date"
               name="project_et"
-              defaultValue={props.data.project_et}
+              defaultValue="2021-03-08"
               className={classes.textField}
               InputLabelProps={{
                 shrink: true,

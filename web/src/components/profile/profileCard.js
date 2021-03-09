@@ -21,7 +21,8 @@ const theme = createMuiTheme({
 const useStyles = makeStyles((theme) => ({
   root: {
     width: 300,
-    height: 300
+    height: 300,
+    margin : 20
   },
 
   title: {

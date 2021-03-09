@@ -13,6 +13,7 @@ import User from './components/portfolio/user';
 import Network from './components/network/network';
 import Header from './components/Header/header';
 import HookFormLogin from './components/auth/HookFormLogin';
+import Logo from'./static/images/RacerIn_logo2.png'
 
 import React, { useEffect, useState, createContext } from 'react';
 import { Row, Container, Col, Form, Nav, Navbar, Button } from 'react-bootstrap';
@@ -68,7 +69,8 @@ function App() {
 
         <Switch>
           <Route exact path="/">
-            <Container>
+            <Container className ='logodiv'>
+              <img className='logo' src = {Logo}></img>
               <HookFormLogin setLoginUserId={setLoginUserId} />
             </Container>
 
@@ -76,7 +78,8 @@ function App() {
 
           {/* 로그인 */}
           <Route path="/login">
-            <Container>
+            <Container className ='logodiv'>
+              <img className='logo' src = {Logo}></img>
               <HookFormLogin setLoginUserId={setLoginUserId} />
             </Container>
           </Route>
