@@ -1,12 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
-import { Link, useHistory } from 'react-router-dom'
+import { Button } from 'react-bootstrap';
+import { useForm, Controller } from "react-hook-form";
+import {
+  TextField,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  ThemeProvider,
+  createMuiTheme
+} from "@material-ui/core";
+import { yupResolver } from '@hookform/resolvers/yup';
 
-import { Formik, ErrorMessage } from 'formik'
 import * as yup from 'yup'
 import axios from 'axios';
+import './edu.css';
 
-const schema = yup.object().shape({
+const EduSchema = yup.object().shape({
   edu_sc_nm: yup
     .string()
     .required(),
@@ -15,160 +24,231 @@ const schema = yup.object().shape({
     .required(),
   edu_gd_ck: yup
     .number()
-    .integer(),
-  // .required()
-  user_id: yup
-    .number()
-  //   // .number()
-  //   // .integer()
+    .integer()
+    .required()
 });
 
-function Edu() {
-  let [form, setForm] = useState(false);
-  let [eduNm, seteduNm] = useState(["엘리스대학교","엘리스대학원"])
-  // let [titleId, setTitleId] = useState(0);
+/* react-hook-form theme 생성 */
+const theme = createMuiTheme({
+  palette: {
+    type: "dark"
+  }
+});
 
-  let data = {
-    id: window.user_id
+
+function Edu({ loginUserId, isEditable }) {
+  /* useState */
+  const [edu, setEdu] = useState([]);
+  const [form, setForm] = useState(false);
+
+  const { control, handleSubmit, errors } = useForm({ resolver: yupResolver(EduSchema) });
+
+  /* access_token 조회 */
+  const access_token = localStorage.getItem('access_token');
+  axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+
+  useEffect(() => {
+    if (loginUserId != '') {
+      //console.log('loginUserId',loginUserId);
+      getEduList(loginUserId);
+    }
+  }, [loginUserId])
+
+  /* edu get */
+  const getEduList = (data) => {
+    axios.get(`http://${window.location.hostname}:5000/edu/?user_id=${data}`, {})
+      .then(response => {
+        //console.log(response) 
+        setEdu(response.data.result);
+      })
   }
 
-  useEffect(()=>
-    axios.get('http://localhost:5000/portfolio', data).then(response => {
-      console.log(response)
-      if (response.data.status === "success") {
-        console.log(response);
-      }
-    })
-  )
-
-  const post = (data) => {
-    axios.post(`http://localhost:5000/portfolio/edu`, data)
+  /* edu post */
+  const postEdu = (data) => {
+    data.user_id = loginUserId;
+    axios.post(`http://${window.location.hostname}:5000/edu/`, data)
       .then(response => {
-        console.log("response: ", response.data.result)
+        console.log("response: ", response.data.result);
+        getEduList(loginUserId);
+        setForm(false);
       }).catch(() => {
         console.log("fail")
       })
   }
 
+  /* 학력 form 제출 */
+  const onSubmit = (data) => {
+    //console.log('data', data);
+    //alert(JSON.stringify(data, null, 2));
+    postEdu(data);
+  };
+
   return (
-    <div>
-      <h3>학력</h3>
-      <br/>
+    <div className='borderDiv'>
+      <label><h3 className='topTitle'>학력</h3></label>
+      <br />
       {
-        eduNm.map(function(title,i) {
-          return (
-            <div key={i}>
-              <h4>
-                {title}
-              </h4>
-              <p>졸업</p>
-              <hr/>
-            </div>
-          )
-        })
+        edu.map((data) => (
+          <EduList key={data.id} data={data} loginUserId={loginUserId} isEditable={isEditable} />
+        ))
       }
-
-
-      <Button onClick={() => { setForm(!form) }}>
-        {
-          form == true
-            ? '닫기'
-            : '작성하기'
-        }
-      </Button>
       {
-        form == true
-          ? <Formik
-            validationSchema={schema}
-            onSubmit={(values) => {
-              values.user_id = window.user_id
-              console.log("values", values);
-              alert(JSON.stringify(values, null, 2));
-              post(values);
-            }}
-            initialValues={{
-              edu_sc_nm: '',
-              edu_major: '',
-              edu_gd_ck: 1,
-              user_id: ''
-            }}
-          >
-            {({
-              handleSubmit,
-              handleChange,
-              values,
-            }) => (
-              <Form noValidate onSubmit={handleSubmit}>
-                user_id :{window.user_id}
-                {/* 학교이름*/}
-                <Form.Group>
-                  <Form.Label >학교이름</Form.Label>
-                  <InputGroup hasValidation>
-                    <Form.Control
-                      type="text"
-                      name="edu_sc_nm"
-                      value={values.edu_sc_nm}
-                      onChange={handleChange}
-                    />
-                  </InputGroup>
-                  <ErrorMessage name="edu_sc_nm" component="p" />
-                </Form.Group>
-                {/* 전공  */}
-                <Form.Group>
-                  <Form.Label>전공</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="edu_major"
-                    value={values.edu_major}
-                    onChange={handleChange}
-                  />
-                  <ErrorMessage name="edu_major" component="p" />
-                </Form.Group>
-
-                {/* 상태 */}
-                <fieldset>
-                  <Form.Group as={Row}>
-                    <Form.Check
-                      type="radio"
-                      inline
-                      label="재학중"
-                      value="1"
-                      name="formHorizontalRadios"
-                    />
-                    <Form.Check
-                      type="radio"
-                      inline
-                      label="학사졸업"
-                      value="2"
-                      name="formHorizontalRadios"
-                    />
-                    <Form.Check
-                      type="radio"
-                      inline
-                      label="석사졸업"
-                      value="3"
-                      name="formHorizontalRadios"
-                    />
-                    <Form.Check
-                      type="radio"
-                      inline
-                      label="박사졸업"
-                      value="4"
-                      name="formHorizontalRadios"
-                    />
-                    <ErrorMessage name="edu_gd_ck" component="p" />
-                  </Form.Group>
-                </fieldset>
-                <Button inline type="submit">확인</Button>
-                <Button inline onClick={()=>{setForm(false)}} >취소</Button>
-              </Form>
-            )}
-          </Formik>
-          : null
+        isEditable && (
+          <Button className='register' onClick={() => { setForm(!form) }}>
+            {
+              form
+                ? '닫기'
+                : '작성하기'
+            }
+          </Button>
+        )
       }
-
+      {
+        form
+        &&
+        <ThemeProvider theme={theme}>
+          <div className="container">
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <section>
+                <label><h5>학교</h5></label>
+                <Controller placeholder="학교" as={TextField} name="edu_sc_nm" control={control} fullWidth defaultValue="" />
+                {errors.edu_sc_nm && <p>학교이름을 입력해주세요.</p>}
+              </section>
+              <section>
+                <label><h5>전공</h5></label>
+                <Controller placeholder="전공" as={TextField} name="edu_major" control={control} fullWidth defaultValue="" />
+                {errors.edu_major && <p>전공을 입력해주세요.</p>}
+              </section>
+              <section>
+                <Controller
+                  as={
+                    <RadioGroup row aria-label="position" name="edu_gd_ck">
+                      <FormControlLabel value="1" control={<Radio />} label="재학중" />
+                      <FormControlLabel value="2" control={<Radio />} label="학사졸업" />
+                      <FormControlLabel value="3" control={<Radio />} label="석사졸업" />
+                      <FormControlLabel value="4" control={<Radio />} label="박사졸업" />
+                    </RadioGroup>
+                  }
+                  name="edu_gd_ck"
+                  control={control}
+                  defaultValue=""
+                />
+                {errors.edu_gd_ck && <p>상태를 선택해주세요.</p>}
+              </section>
+              <input className="userSubmit" type="submit" />
+            </form>
+          </div>
+        </ThemeProvider>
+      }
     </div>
   );
+}
+
+function EduList(props) {
+  const { control, handleSubmit, errors } = useForm({ resolver: yupResolver(EduSchema) });
+  const [isClicked, setIsClicked] = useState(false);
+
+  const onClickModify = (e) => {
+    e.preventDefault();
+
+    if (isClicked) {
+      setIsClicked(false);
+    } else {
+      setIsClicked(true);
+    }
+  }
+
+  const onClickDelete = (e) => {
+    const id = e.target.dataset.id;
+
+    if (window.confirm('삭제 하시겠습니까?')) {
+      axios.delete(`http://${window.location.hostname}:5000/edu/?id=${id}`, {})
+        .then(response => {
+          //수정
+          window.location.reload();
+
+        }).catch(() => {
+          console.log("fail")
+        })
+    }
+  }
+
+  const onSubmit = (data) => {
+    //console.log('data', data);
+    //alert(JSON.stringify(data, null, 2));
+    putEdu(data);
+  };
+
+  /* edu put */
+  const putEdu = (data) => {
+    data.user_id = props.loginUserId;
+
+    if (window.confirm('수정 하시겠습니까?')) {
+      axios.put(`http://${window.location.hostname}:5000/edu/`, data)
+        .then(response => {
+          setIsClicked(false);
+          alert("저장되었습니다.");
+        }).catch(() => {
+          console.log("fail")
+        })
+    }
+
+  }
+
+  return (
+    <ThemeProvider theme={theme}>
+      <div key={props.data.key} className="container">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <section>
+            <label>
+              <h5>학교</h5>
+              {
+                props.isEditable && (
+                  <span className='floatR'>
+                    {
+                      isClicked ? (
+                        <a href='#' onClick={onClickModify}>닫기</a>
+                      ) : (
+                          <a href='#' onClick={onClickModify}>수정</a>
+                        )
+                    }
+                    &nbsp; &nbsp; <a href='#' data-id={props.data.id} onClick={onClickDelete}>삭제</a>
+                  </span>
+                )
+              }
+            </label>
+            <Controller disabled={isClicked ? false : true} placeholder="학교" as={TextField} name="edu_sc_nm" control={control} fullWidth defaultValue={props.data.edu_sc_nm} />
+            {errors.edu_sc_nm && <p>학교이름을 입력해주세요.</p>}
+          </section>
+          <section>
+            <label><h5>전공</h5></label>
+            <Controller disabled={isClicked ? false : true} placeholder="전공" as={TextField} name="edu_major" control={control} fullWidth defaultValue={props.data.edu_major} />
+            {errors.edu_major && <p>전공을 입력해주세요.</p>}
+          </section>
+          <section>
+            <Controller
+              as={
+                <RadioGroup row aria-label="position" name="edu_gd_ck" value={props.data.edu_gd_ck}>
+                  <FormControlLabel disabled={isClicked ? false : true} value="1" control={<Radio />} label="재학중" />
+                  <FormControlLabel disabled={isClicked ? false : true} value="2" control={<Radio />} label="학사졸업" />
+                  <FormControlLabel disabled={isClicked ? false : true} value="3" control={<Radio />} label="석사졸업" />
+                  <FormControlLabel disabled={isClicked ? false : true} value="4" control={<Radio />} label="박사졸업" />
+                </RadioGroup>
+              }
+              name="edu_gd_ck"
+              control={control}
+              defaultValue={props.data.edu_gd_ck.toString()}
+            />
+            {errors.edu_gd_ck && <p>상태를 선택해주세요.</p>}
+          </section>
+          <Controller type="hidden" as={TextField} name="id" control={control} defaultValue={props.data.id} />
+          {
+            isClicked && (<input className="userSubmit" type="submit" />)
+          }
+        </form>
+      </div>
+    </ThemeProvider>
+  )
 }
 
 export default Edu;

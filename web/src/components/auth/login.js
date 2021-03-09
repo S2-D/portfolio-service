@@ -10,18 +10,18 @@ import axios from 'axios';
 const schema = yup.object().shape({
   email: yup
     .string()
+    .email("이메일 형식으로 입력하세요")
     .required("아이디를 입력해주세요"),
   password: yup
     .string()
-    // .min(8, '8자리 이상으로 만들어주세요')
-    // .max(16)
-    // .matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*d)[a-zA-Zd]$")
+// .min(8, '8자리 이상으로 만들어주세요')
+      // .max(16)
+      // .matches("^(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$","비밀번호는 영문/ 숫자/ 특수문자를 모두 포함해야 합니다.")
     .required("비밀번호를 입력해주세요")
 });
 
 
 function Login() {
-
   let history = useHistory();
   const post = (data) => {
     axios.post(`http://${window.location.hostname}:5000/auth/login`, data)

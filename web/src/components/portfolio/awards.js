@@ -1,96 +1,220 @@
-import React, { useState } from 'react';
-import { Row, Col, Form, Button, InputGroup } from 'react-bootstrap';
-import { Link, useHistory } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import { Button } from 'react-bootstrap';
+import { useForm, Controller } from "react-hook-form";
+import {
+  TextField,
+  ThemeProvider,
+  createMuiTheme
+} from "@material-ui/core";
+import { yupResolver } from '@hookform/resolvers/yup';
 
-import {Formik, ErrorMessage } from 'formik'
 import * as yup from 'yup'
 import axios from 'axios';
+import './edu.css';
 
-const schema = yup.object().shape({
-    awards_nm:yup
-      .string()
-      .required(),
-    awards_desc: yup
-      .string()
-      .required(),
-    user_id : yup
-      .string()
-      // .number()
-      // .integer()
-  });
+const AwardsSchema = yup.object().shape({
+  awards_nm: yup
+    .string()
+    .required(),
+  awards_desc: yup
+    .string()
+    .required(),
+});
 
-function Awards() {
-  let [form, setForm] = useState(false);
-  let [award, setAward] = useState([]);
-  let [userid, setUserid] =useState(''); 
-  
+const theme = createMuiTheme({
+  palette: {
+    type: "dark"
+  }
+});
+
+
+function Awards({ loginUserId, isEditable }) {
+  /* useState */
+  const [awards, setAwards] = useState([]);
+  const [form, setForm] = useState(false);
+
+  const { control, handleSubmit, errors } = useForm({ resolver: yupResolver(AwardsSchema) });
+
+  /* access_token 조회 */
   const access_token = localStorage.getItem('access_token');
   axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
+  useEffect(() => {
+    if (loginUserId != '') {
+      //console.log('loginUserId', loginUserId);
+      getAwardsList(loginUserId);
+    }
+  }, [loginUserId])
 
-
-  const post = (data) => {
-    axios.post(`http://${window.location.hostname}:5000/portfolio/awards`, data)
+  /* awards get */
+  const getAwardsList = (data) => {
+    axios.get(`http://${window.location.hostname}:5000/awards/?user_id=${data}`, {})
       .then(response => {
-        console.log("response: ", response.data.result)
+        setAwards(response.data.result);
+        //console.log("awards", awards);
+      })
+  }
+
+  /* awards post */
+  const postAwards = (data) => {
+    data.user_id = loginUserId;
+    axios.post(`http://${window.location.hostname}:5000/awards/`, data)
+      .then(response => {
+        //console.log("response: ", response.data.result);
+        getAwardsList(loginUserId);
+        setForm(false);
       }).catch(() => {
         console.log("fail")
       })
   }
-  return (
-    <Formik
-      validationSchema={schema}
-      onSubmit={values => {
-        values.user_id = window.user_id
-        console.log(values);    
-        alert(JSON.stringify(values, null, 2));
-        post(values);
-      }}
-      initialValues={{
-        awards_nm: '',
-        awards_desc: '',
-        user_id: ''
-      }}
-    >
-      {({
-        handleSubmit,
-        handleChange,
-        values,
-      }) => (
-        <Form noValidate onSubmit={handleSubmit}>
-          user_id :{window.user_id}
-          <h3>수상이력</h3>
-              {/* 수상내역 */}
-            <Form.Group>
-              <Form.Label>수상내역</Form.Label>
-                <InputGroup hasValidation>
-                    <Form.Control
-                        type="text"
-                        name="awards_nm"
-                        value={values.awards_nm}
-                        onChange={handleChange}
-                    />
-                </InputGroup>
-              <ErrorMessage name="awards_nm" component="p" />
-            </Form.Group>
 
-            {/* 상세내역  */}
-            <Form.Group>
-              <Form.Label>상세내역</Form.Label>
-              <Form.Control
-                type="text"
-                name="awards_desc"
-                value={values.awards_desc}
-                onChange={handleChange}
-                />
-              <ErrorMessage name="awards_desc" component="p" />
-            </Form.Group>
-          <Button inline type="submit">확인</Button>
-          <Button inline >취소</Button>
-        </Form>
-      )}
-    </Formik>
+  /* 수상내역 form 제출 */
+  const onSubmit = (data) => {
+    //console.log('data', data);
+    //alert(JSON.stringify(data, null, 2));
+    postAwards(data);
+  };
+
+
+  return (
+    <div className='borderDiv'>
+      <div>
+        <label><h3 className='topTitle'>수상내역</h3></label>
+        <br />
+        {
+          awards.map((data) => (
+            <AwardsList key={data.id} data={data} loginUserId={loginUserId} isEditable={isEditable} />
+          ))
+        }
+        {
+          isEditable && (
+            <Button className='register' onClick={() => { setForm(!form) }}>
+              {
+                form
+                  ? '닫기'
+                  : '작성하기'
+              }
+            </Button>
+          )
+        }
+        {
+          form
+          &&
+          <ThemeProvider theme={theme}>
+            <div className="container">
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <section>
+                  <label><h5>수상내역</h5></label>
+                  <Controller placeholder="" as={TextField} name="awards_nm" control={control} fullWidth defaultValue="" />
+                  {errors.awards_nm && <p>학교이름을 입력해주세요.</p>}
+                </section>
+                <section>
+                  <label><h5>상세내역</h5></label>
+                  <Controller placeholder="" as={TextField} name="awards_desc" control={control} fullWidth defaultValue="" />
+                  {errors.awards_desc && <p>전공을 입력해주세요.</p>}
+                </section>
+                <input className="userSubmit" type="submit" />
+              </form>
+            </div>
+          </ThemeProvider>
+        }
+      </div>
+    </div>
   );
+}
+
+function AwardsList(props) {
+  const { control, handleSubmit, errors } = useForm({ resolver: yupResolver(AwardsSchema) });
+  const [isClicked, setIsClicked] = useState(false);
+
+  const onClickModify = (e) => {
+    e.preventDefault();
+
+    if (isClicked) {
+      setIsClicked(false);
+    } else {
+      setIsClicked(true);
+    }
+  }
+
+  const onClickDelete = (e) => {
+
+    //console.log(e.target.dataset.id)
+    const id = e.target.dataset.id;
+
+    if (window.confirm('삭제 하시겠습니까?')) {
+      axios.delete(`http://${window.location.hostname}:5000/awards/?id=${id}`, {})
+        .then(response => {
+          //수정
+          window.location.reload();
+
+        }).catch(() => {
+          console.log("fail")
+        })
+    }
+  }
+
+  const onSubmit = (data) => {
+    //console.log('data', data);
+    //alert(JSON.stringify(data, null, 2));
+    putAwards(data);
+  };
+
+
+  /* Awards put */
+  const putAwards = (data) => {
+    data.user_id = props.loginUserId;
+
+    if (window.confirm('수정 하시겠습니까?')) {
+      axios.put(`http://${window.location.hostname}:5000/awards/`, data)
+        .then(response => {
+          setIsClicked(false);
+          alert("저장되었습니다.");
+        }).catch(() => {
+          console.log("fail")
+        })
+    }
+
+  }
+
+  return (
+    <ThemeProvider theme={theme}>
+      <div key={props.data.key} className="container">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <section>
+            <label>
+              <h5>수상내역</h5>
+              {
+                props.isEditable && (
+                  <span className='floatR'>
+                    {
+                      isClicked ? (
+                        <a href='#' onClick={onClickModify}>닫기</a>
+                      ) : (
+                          <a href='#' onClick={onClickModify}>수정</a>
+                        )
+                    }
+                          &nbsp; &nbsp; <a href='#' data-id={props.data.id} onClick={onClickDelete}>삭제</a>
+                  </span>
+                )
+              }
+            </label>
+            <Controller disabled={isClicked ? false : true} placeholder="수상내역" as={TextField} name="awards_nm" control={control} fullWidth defaultValue={props.data.awards_nm} />
+            {errors.awards_nm && <p>수상 내역을 입력해주세요.</p>}
+          </section>
+          <section>
+            <label><h5>상세</h5></label>
+            <Controller disabled={isClicked ? false : true} placeholder="상세" as={TextField} name="awards_desc" control={control} fullWidth defaultValue={props.data.awards_desc} />
+            {errors.awards_desc && <p>상세 내용을 입력해주세요.</p>}
+          </section>
+          <Controller type="hidden" as={TextField} name="id" control={control} defaultValue={props.data.id} />
+          {
+            isClicked && (<input className="userSubmit" type="submit" />)
+          }
+        </form>
+      </div>
+    </ThemeProvider>
+  )
 }
 
 export default Awards;

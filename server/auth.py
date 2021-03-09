@@ -95,10 +95,10 @@ def login():
         if error is None:
             # access_token 생성
             access_token = create_access_token(identity=user[2])
-
-            return jsonify(status = "success", result = {"access_token": access_token})
-
-    return jsonify(status = "fail", result = {"error": error})
+            return jsonify(status = "success", result = {"email": user[0], "id": user[2], "access_token": access_token })
+        
+        else:
+            return jsonify(status = "fail", result = {"error": error})
 
 
 @bp.route('/logout')

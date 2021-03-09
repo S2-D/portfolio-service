@@ -40,13 +40,29 @@ def create_app():
 
     app.register_blueprint(edu.bp)
 
+    import awards
+
+    app.register_blueprint(awards.bp)
+
+    import project
+
+    app.register_blueprint(project.bp)
+
+    import license
+
+    app.register_blueprint(license.bp)
+
     import network
 
     app.register_blueprint(network.bp)
 
-    with app.app_context():
-        import db
+    import profile
 
-        db.init_db()
+    app.register_blueprint(profile.bp)
+
+    # with app.app_context():
+    #     import db
+
+    #     db.init_db()
 
     return app
